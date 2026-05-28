@@ -3,6 +3,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+  background: #f5f7fb;
+}
+
+button,
+a {
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
 :root {
   --background: 210 20% 98%;
   --foreground: 222 47% 11%;

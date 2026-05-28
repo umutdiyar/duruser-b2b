@@ -7,12 +7,10 @@ type DashboardShellProps = {
 
 export function DashboardShell({ children, role }: DashboardShellProps) {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
-      <div className="flex">
-        <DashboardSidebar role={role} />
+    <div className="min-h-screen bg-[#f5f7fb]">
+      <DashboardSidebar role={role} />
 
-        <main className="min-h-screen flex-1 overflow-hidden">{children}</main>
-      </div>
+      <main className="min-h-screen flex-1 lg:ml-[290px]">{children}</main>
     </div>
   );
 }
