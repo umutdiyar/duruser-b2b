@@ -1,12 +1,11 @@
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, PackageCheck, Clock, Truck } from "lucide-react";
 
 export default function AdminDashboardPage() {
   return (
-    <DashboardShell role="admin">
+    <div>
       <DashboardHeader
         title="Yönetim Paneli"
         description="DuruSer sipariş operasyonunu buradan takip edebilirsiniz."
@@ -127,6 +126,6 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </DashboardShell>
+    </div>
   );
 }

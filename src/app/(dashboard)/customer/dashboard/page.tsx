@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function CustomerDashboardPage() {
   return (
-    <DashboardShell role="customer">
+    <div>
       <DashboardHeader
         title="Müşteri Paneli"
         description="Siparişlerinizi buradan oluşturabilir ve takip edebilirsiniz."
@@ -65,6 +65,6 @@ export default function CustomerDashboardPage() {
           </Card>
         </div>
       </div>
-    </DashboardShell>
+    </div>
   );
 }

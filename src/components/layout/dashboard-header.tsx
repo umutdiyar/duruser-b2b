@@ -2,6 +2,8 @@ import { Bell, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+import { logoutAction } from "@/actions/auth-actions";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type DashboardHeaderProps = {
@@ -30,9 +32,9 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
             <Bell className="h-4 w-4" />
           </Button>
 
-          <Avatar className="h-10 w-10 border">
-            <AvatarFallback>DB</AvatarFallback>
-          </Avatar>
+          <form action={logoutAction}>
+            <Button variant="outline">Çıkış Yap</Button>
+          </form>
         </div>
       </div>
     </header>
