@@ -43,6 +43,11 @@ export const customerNavigation = [
     icon: LayoutDashboard,
   },
   {
+    title: "Ürünler",
+    href: "/customer/products",
+    icon: Package,
+  },
+  {
     title: "Yeni Sipariş",
     href: "/customer/new-order",
     icon: PlusCircle,

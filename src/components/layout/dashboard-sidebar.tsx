@@ -58,7 +58,11 @@ const customerLinks = [
     href: "/customer/dashboard",
     icon: LayoutDashboard,
   },
-
+  {
+    title: "Ürünler",
+    href: "/customer/products",
+    icon: Package,
+  },
   {
     label: "Yeni Sipariş",
     href: "/customer/new-order",
