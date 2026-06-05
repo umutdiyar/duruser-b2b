@@ -1,5 +1,7 @@
 import Link from "next/link";
+
 import {
+  AlertCircle,
   ArrowRight,
   Building2,
   CheckCircle2,
@@ -9,13 +11,27 @@ import {
 } from "lucide-react";
 
 import { loginAction } from "@/actions/auth-actions";
+
 import { PasswordInput } from "@/components/auth/password-input";
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    error?: string;
+  }>;
+}) {
+  const params = await searchParams;
+
+  const error = params?.error;
   return (
     <main className="min-h-screen bg-[#f5f7fb]">
       <div className="grid min-h-screen lg:grid-cols-2">
@@ -128,6 +144,32 @@ export default function LoginPage() {
                 </p>
               </div>
 
+              {error === "credentials" && (
+                <div className="mt-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+
+                  <div>
+                    <p className="font-semibold">Giriş başarısız</p>
+
+                    <p className="mt-1">Email adresi veya şifre hatalı.</p>
+                  </div>
+                </div>
+              )}
+
+              {error === "unexpected" && (
+                <div className="mt-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+
+                  <div>
+                    <p className="font-semibold">Beklenmeyen hata</p>
+
+                    <p className="mt-1">
+                      Sistemsel bir hata oluştu. Lütfen tekrar deneyin.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <form action={loginAction} className="mt-8 space-y-5">
                 <div className="space-y-2">
                   <Label>Email</Label>
@@ -163,15 +205,32 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <Button className="h-12 w-full rounded-2xl bg-orange-500 font-semibold hover:bg-orange-600">
+                <Button
+                  type="submit"
+                  className="h-12 w-full rounded-2xl bg-orange-500 font-semibold shadow-lg shadow-orange-500/20 transition-all hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/30"
+                >
+                  {" "}
                   Giriş Yap
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </form>
 
-              <div className="mt-6 rounded-2xl bg-slate-50 p-4 text-xs text-muted-foreground">
-                <p>Admin: admin@duruser.com / 123456</p>
-                <p>Müşteri: customer@abcmarket.com / 123456</p>
+              <div className="mt-6 rounded-3xl border bg-slate-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Demo Hesapları
+                </p>
+
+                <div className="mt-3 space-y-2 text-sm">
+                  <p>
+                    <span className="font-semibold">Admin:</span>{" "}
+                    admin@duruser.com / 123456
+                  </p>
+
+                  <p>
+                    <span className="font-semibold">Müşteri:</span>{" "}
+                    customer@duruser.com / 123456
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

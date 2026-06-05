@@ -1,21 +1,31 @@
 "use server";
 
-import { signIn, signOut } from "../auth";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+
+import { signIn, signOut } from "@/auth";
 
 export async function loginAction(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
   try {
     await signIn("credentials", {
-      email: formData.get("email"),
-      password: formData.get("password"),
+      email,
+      password,
       redirectTo: "/redirect",
     });
   } catch (error) {
-    if (error instanceof AuthError) {
-      throw new Error("Email veya şifre hatalı.");
+    if (isRedirectError(error)) {
+      throw error;
     }
 
-    throw error;
+    if (error instanceof AuthError) {
+      redirect("/login?error=credentials");
+    }
+
+    redirect("/login?error=unexpected");
   }
 }
 

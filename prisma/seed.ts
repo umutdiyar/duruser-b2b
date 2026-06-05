@@ -23,14 +23,14 @@ async function main() {
 
   const company = await prisma.company.upsert({
     where: {
-      slug: "abc-market",
+      slug: "musteri-firma",
     },
 
     update: {},
 
     create: {
-      name: "ABC Market",
-      slug: "abc-market",
+      name: "Musteri Firmasi",
+      slug: "musteri-firma",
     },
   });
 
@@ -40,18 +40,39 @@ async function main() {
 
   const products = [
     {
-      name: "Karışık Sandviç",
-      price: 120,
+      name: "al'bi Kavurmalı Karışık Tost",
+      description:
+        "Tercihe göre focaccia ekmeği ve ya ciabatta ekmeği içinde, kavurma, suda mozerella peyniri, domates ve biber ile...",
+      price: 420,
+      imageUrl:
+        "https://durusergida.com/storage/media/97/conversions/ubap7375-crop.JPG",
     },
 
     {
-      name: "Tavuk Wrap",
-      price: 140,
+      name: "al'bi RoastBeef Sandviç",
+      description:
+        "Panini ekmek içinde roastbeef, kaşar peyniri ve özel üretim sosumuz ile...",
+      price: 680,
+      imageUrl:
+        "https://durusergida.com/storage/media/73/conversions/ubap7369-crop.JPG",
     },
 
     {
-      name: "Sezar Salata",
-      price: 110,
+      name: "al'bi Pesto Soslu Mozerella Sandviç",
+      description:
+        "Tercihe göre focaccia ekmeği ve ya ciabatta ekmeği içinde, suda mozerella peyniri, pesto sos ve kuru domates ile...",
+      price: 540,
+      imageUrl:
+        "https://durusergida.com/storage/media/98/conversions/ubap7411-crop.JPG",
+    },
+
+    {
+      name: "al'bi Atom Sandviç",
+      description:
+        "Panini ekmeği içinde, kaşar peyniri, çıtır kapya ve meksika biberli atom sos ile...",
+      price: 890,
+      imageUrl:
+        "https://durusergida.com/storage/media/102/conversions/ubap7382-crop.JPG",
     },
   ];
 
@@ -89,15 +110,15 @@ async function main() {
 
   await prisma.user.upsert({
     where: {
-      email: "customer@abcmarket.com",
+      email: "customer@duruser.com",
     },
 
     update: {},
 
     create: {
-      name: "ABC Market",
+      name: "Musteri Firmasi",
 
-      email: "customer@abcmarket.com",
+      email: "customer@duruser.com",
 
       password: hashedPassword,
 

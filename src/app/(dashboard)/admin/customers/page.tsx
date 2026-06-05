@@ -9,6 +9,8 @@ import { DashboardContainer } from "@/components/layout/dashoard-container";
 
 import { Card, CardContent } from "@/components/ui/card";
 
+// import { deleteCompanyAction } from "@/actions/company-actions";
+
 import { Button } from "@/components/ui/button";
 
 export default async function CustomersPage() {
@@ -113,6 +115,18 @@ export default async function CustomersPage() {
                     Firmayı Yönet
                   </Link>
                 </Button>
+
+                {/* <form
+                  action={async () => {
+                    "use server";
+
+                    await deleteCompanyAction(company.id);
+                  }}
+                >
+                  <Button variant="destructive" type="submit">
+                    Sil
+                  </Button>
+                </form> */}
               </CardContent>
             </Card>
           ))}
