@@ -13,6 +13,7 @@ import {
 import { prisma } from "@/lib/prisma";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { DashboardContainer } from "@/components/layout/dashoard-container";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -42,7 +43,7 @@ export default async function ProductsPage() {
         description="Ürün kataloğunu yönetin."
       />
 
-      <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
+      <DashboardContainer>
         {/* HERO */}
 
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 text-white shadow-xl ">
@@ -198,7 +199,7 @@ export default async function ProductsPage() {
             </Card>
           ))}
         </div>
-      </div>
+      </DashboardContainer>
     </>
   );
 }

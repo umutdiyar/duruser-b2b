@@ -170,7 +170,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
           <SheetTrigger asChild>
             <Button
               size="icon"
-              className="rounded-2xl bg-orange-500 shadow-xl shadow-orange-500/25"
+              className="fixed left-4 top-4 z-50 h-11 w-11 rounded-full shadow-lg lg:hidden"
             >
               <Menu className="h-5 w-5" />
             </Button>

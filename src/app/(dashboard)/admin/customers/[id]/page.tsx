@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { updateCompanyProducts } from "@/actions/company-product-actions";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { DashboardContainer } from "@/components/layout/dashoard-container";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,14 +85,14 @@ export default async function CompanyDetailPage({
         description="Firma bilgileri ve ürün yetkilendirmesi."
       />
 
-      <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
+      <DashboardContainer>
+        {" "}
         <Button asChild variant="outline" className="rounded-2xl">
           <Link href="/admin/customers">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Firmalara Dön
           </Link>
         </Button>
-
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
           <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
             <div>
@@ -115,7 +116,6 @@ export default async function CompanyDetailPage({
             </div>
           </CardContent>
         </Card>
-
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
@@ -143,7 +143,6 @@ export default async function CompanyDetailPage({
             </CardContent>
           </Card>
         </div>
-
         <div className="grid gap-6 xl:grid-cols-3">
           <Card className="border-0 shadow-sm xl:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -270,7 +269,7 @@ export default async function CompanyDetailPage({
             </Card>
           </div>
         </div>
-      </div>
+      </DashboardContainer>
     </>
   );
 }

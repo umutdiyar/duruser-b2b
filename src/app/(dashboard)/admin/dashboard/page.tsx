@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrdersChart } from "@/components/dashboard/orders-chart";
+import { DashboardContainer } from "@/components/layout/dashoard-container";
 
 const stats = [
   {
@@ -72,7 +73,7 @@ export default function AdminDashboardPage() {
         description="Sipariş operasyonunu canlı olarak yönetin."
       />
 
-      <div className="mx-auto max-w-[1600px] space-y-8 p-4 sm:p-6 lg:p-8">
+      <DashboardContainer>
         {/* HERO */}
 
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 to-orange-600 via-orange-500 text-white shadow-2xl">
@@ -233,7 +234,7 @@ export default function AdminDashboardPage() {
             ))}
           </CardContent>
         </Card>
-      </div>
+      </DashboardContainer>
     </>
   );
 }

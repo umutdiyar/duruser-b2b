@@ -1,10 +1,7 @@
-import { Bell, Search, LogOut } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { Bell, LogOut, Search } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth-actions";
-
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 type DashboardHeaderProps = {
   title: string;
@@ -13,12 +10,12 @@ type DashboardHeaderProps = {
 
 export function DashboardHeader({ title, description }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/20 bg-white/80 backdrop-blur-xl">
-      <div className="flex min-h-16 items-center justify-between gap-4 pl-16 pr-4 py-3 sm:px-6 lg:min-h-20 lg:px-10 lg:pl-10 md:pl-16">
+    <header className="sticky top-0 z-40 border-b border-white/20 bg-white/85 backdrop-blur-xl">
+      <div className="flex min-h-[72px] items-center justify-between gap-3 py-3 pl-20 pr-4 sm:pl-24 sm:px-6 lg:min-h-20 lg:px-10">
         {" "}
-        {/* LEFT */}
-        <div className="min-w-0 flex-1 lg:flex-none">
-          <h1 className="truncate text-xl lg:text-3xl font-bold tracking-tight text-slate-900 ">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-lg font-bold tracking-tight sm:text-xl lg:text-3xl ">
+            {" "}
             {title}
           </h1>
 
@@ -28,10 +25,7 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
             </p>
           ) : null}
         </div>
-        {/* RIGHT */}
-        <div className="flex items-center gap-2 lg:gap-3">
-          {/* SEARCH */}
-
+        <div className="flex shrink-0 items-center gap-2 lg:gap-3">
           <Button
             size="icon"
             variant="outline"
@@ -39,8 +33,6 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
           >
             <Search className="h-4 w-4" />
           </Button>
-
-          {/* NOTIFICATION */}
 
           <Button
             size="icon"
@@ -50,15 +42,12 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
             <Bell className="h-4 w-4" />
           </Button>
 
-          {/* LOGOUT */}
-
           <form action={logoutAction}>
             <Button
               variant="outline"
-              className="rounded-2xl border-slate-200 bg-white"
+              className="rounded-2xl border-slate-200 bg-white px-3 lg:px-4"
             >
               <LogOut className="h-4 w-4 lg:mr-2" />
-
               <span className="hidden lg:inline">Çıkış Yap</span>
             </Button>
           </form>

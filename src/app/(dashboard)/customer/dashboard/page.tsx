@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { DashboardContainer } from "@/components/layout/dashoard-container";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -58,9 +59,9 @@ export default function CustomerDashboardPage() {
         description="Siparişlerinizi hızlıca yönetin."
       />
 
-      <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
+      <DashboardContainer>
+        {" "}
         {/* HERO */}
-
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl">
           <CardContent className="flex flex-col gap-8 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
             <div>
@@ -95,9 +96,7 @@ export default function CustomerDashboardPage() {
             </div>
           </CardContent>
         </Card>
-
         {/* STATS */}
-
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
@@ -149,9 +148,7 @@ export default function CustomerDashboardPage() {
             </CardContent>
           </Card>
         </div>
-
         {/* ACTIVE ORDERS + FAVORITES */}
-
         <div className="grid gap-6 xl:grid-cols-2">
           {/* ACTIVE ORDERS */}
 
@@ -230,7 +227,7 @@ export default function CustomerDashboardPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </DashboardContainer>
     </>
   );
 }
