@@ -215,7 +215,7 @@ export default async function LoginPage({
                 </Button>
               </form>
 
-              <div className="mt-6 rounded-3xl border bg-slate-50 p-5">
+              {/* <div className="mt-6 rounded-3xl border bg-slate-50 p-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Demo Hesapları
                 </p>
@@ -231,7 +231,7 @@ export default async function LoginPage({
                     customer@duruser.com / 123456
                   </p>
                 </div>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         </section>
