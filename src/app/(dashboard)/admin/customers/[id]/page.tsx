@@ -13,7 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { updateCompanyProducts } from "@/actions/company-product-actions";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { DashboardContainer } from "@/components/layout/dashoard-container";
+import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import {
+  History,
   LayoutDashboard,
   Menu,
   Package,
@@ -16,35 +17,27 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
-
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
 const adminLinks = [
   {
     label: "Dashboard",
     href: "/admin/dashboard",
     icon: LayoutDashboard,
   },
-
   {
     label: "Siparişler",
     href: "/admin/orders",
     icon: ShoppingCart,
   },
-
   {
     label: "Müşteriler",
     href: "/admin/customers",
     icon: Users,
   },
-
   {
     label: "Ürünler",
     href: "/admin/products",
     icon: Package,
   },
-
   {
     label: "Ayarlar",
     href: "/admin/settings",
@@ -58,23 +51,20 @@ const customerLinks = [
     href: "/customer/dashboard",
     icon: LayoutDashboard,
   },
-
   {
     label: "Ürünlerim",
     href: "/customer/products",
     icon: Package,
   },
-
   {
     label: "Yeni Sipariş",
     href: "/customer/new-order",
     icon: ShoppingCart,
   },
-
   {
     label: "Siparişlerim",
     href: "/customer/orders",
-    icon: Package,
+    icon: History,
   },
 ];
 
@@ -82,47 +72,51 @@ type DashboardSidebarProps = {
   role: "admin" | "customer";
 };
 
-function SidebarContent({ role }: DashboardSidebarProps) {
+function SidebarContent({
+  role,
+  onNavigate,
+}: DashboardSidebarProps & {
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   const links = role === "admin" ? adminLinks : customerLinks;
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      {/* TOP */}
-
-      <div className="border-b px-6 py-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-lg font-bold text-white shadow-lg shadow-orange-500/30">
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      <div className="shrink-0 border-b px-5 py-5 sm:px-6 sm:py-6">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-base font-bold text-white shadow-lg shadow-orange-500/30 sm:h-14 sm:w-14 sm:text-lg">
             D
           </div>
 
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-slate-900">
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-bold tracking-tight text-slate-900 sm:text-lg">
               DuruSer
             </h2>
 
-            <p className="text-sm text-slate-500">Sipariş Paneli</p>
+            <p className="truncate text-xs text-slate-500 sm:text-sm">
+              Sipariş Paneli
+            </p>
           </div>
         </div>
       </div>
 
-      {/* NAV */}
-
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
         <nav className="space-y-2">
           {links.map((link) => {
             const Icon = link.icon;
 
-            const isActive = pathname === link.href;
+            const isActive =
+              pathname === link.href || pathname.startsWith(`${link.href}/`);
 
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={onNavigate}
                 className={cn(
-                  "group flex h-14 items-center gap-4 rounded-2xl px-5 text-sm font-medium transition-all duration-200",
-
+                  "group flex h-12 min-w-0 items-center gap-3 rounded-2xl px-4 text-sm font-medium transition-all duration-200 sm:h-14 sm:gap-4 sm:px-5",
                   isActive
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25"
                     : "text-slate-600 hover:bg-orange-50 hover:text-orange-600",
@@ -130,25 +124,22 @@ function SidebarContent({ role }: DashboardSidebarProps) {
               >
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition",
-
+                    "h-5 w-5 shrink-0 transition",
                     isActive
                       ? "text-white"
                       : "text-slate-400 group-hover:text-orange-500",
                   )}
                 />
 
-                {link.label}
+                <span className="truncate">{link.label}</span>
               </Link>
             );
           })}
         </nav>
       </div>
 
-      {/* BOTTOM */}
-
-      <div className="border-t p-5">
-        <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-5">
+      <div className="shrink-0 border-t p-4 sm:p-5">
+        <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-5">
           <p className="text-sm font-semibold text-slate-900">DuruSer B2B</p>
 
           <p className="mt-1 text-xs leading-relaxed text-slate-500">
@@ -161,32 +152,46 @@ function SidebarContent({ role }: DashboardSidebarProps) {
 }
 
 export function DashboardSidebar({ role }: DashboardSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <>
-      {/* DESKTOP */}
-
-      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[290px] border-r border-white/20 bg-white/80 backdrop-blur-xl lg:flex">
+      <aside className="fixed left-0 top-0 z-50 hidden h-screen w-[290px] border-r border-slate-200 bg-white/90 backdrop-blur-xl lg:block">
         <SidebarContent role={role} />
       </aside>
 
-      {/* MOBILE */}
+      <button
+        type="button"
+        aria-label="Menüyü aç"
+        onClick={() => setIsOpen(true)}
+        className="fixed left-4 top-4 z-[200] flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-white shadow-xl shadow-orange-500/25 transition hover:bg-orange-600 active:scale-95 lg:hidden"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
 
-      <div className="fixed left-4 top-3 z-50 lg:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              size="icon"
-              className="fixed left-4 top-4 z-50 h-11 w-11 rounded-full shadow-lg lg:hidden"
+      {isOpen ? (
+        <div className="fixed inset-0 z-[300] lg:hidden">
+          <button
+            type="button"
+            aria-label="Menüyü kapat"
+            onClick={() => setIsOpen(false)}
+            className="absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-sm"
+          />
+
+          <aside className="absolute left-0 top-0 h-full w-[290px] max-w-[85vw] overflow-hidden bg-white shadow-2xl">
+            <button
+              type="button"
+              aria-label="Menüyü kapat"
+              onClick={() => setIsOpen(false)}
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 active:scale-95"
             >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
+              <X className="h-5 w-5" />
+            </button>
 
-          <SheetContent side="left" className="w-[300px] p-0">
-            <SidebarContent role={role} />
-          </SheetContent>
-        </Sheet>
-      </div>
+            <SidebarContent role={role} onNavigate={() => setIsOpen(false)} />
+          </aside>
+        </div>
+      ) : null}
     </>
   );
 }

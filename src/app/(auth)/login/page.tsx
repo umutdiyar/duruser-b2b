@@ -111,7 +111,7 @@ export default async function LoginPage({
           </div>
         </section>
 
-        <section className="flex items-center justify-center p-4 sm:p-6 lg:p-10">
+        <section className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:p-10">
           <Card className="w-full max-w-md border-0 bg-white shadow-2xl shadow-slate-200/70">
             <CardContent className="p-6 sm:p-8">
               <div className="mb-8 lg:hidden">

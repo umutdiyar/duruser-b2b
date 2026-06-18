@@ -13,7 +13,7 @@ import {
 import { prisma } from "@/lib/prisma";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { DashboardContainer } from "@/components/layout/dashoard-container";
+import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 import { Card, CardContent } from "@/components/ui/card";
 

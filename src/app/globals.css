@@ -5,12 +5,27 @@
 
 html,
 body {
+  width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 * {
   box-sizing: border-box;
+}
+
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
 
 img,
@@ -20,12 +35,11 @@ canvas {
   max-width: 100%;
 }
 
-button,
-a {
-  cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    opacity 0.15s ease;
+input,
+textarea,
+select,
+button {
+  touch-action: manipulation;
 }
 
 button:active {

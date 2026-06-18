@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type PasswordInputProps = {
@@ -20,22 +19,23 @@ export function PasswordInput({ name }: PasswordInputProps) {
         type={showPassword ? "text" : "password"}
         placeholder="Şifreniz"
         required
-        className="h-12 rounded-2xl pr-12"
+        autoComplete="current-password"
+        className="h-12 rounded-2xl pr-14"
       />
 
-      <Button
+      <button
         type="button"
-        size="icon"
-        variant="ghost"
+        aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+        onMouseDown={(event) => event.preventDefault()}
         onClick={() => setShowPassword((prev) => !prev)}
-        className="absolute right-2 top-2 h-8 w-8 rounded-xl"
+        className="absolute right-2 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 active:scale-95"
       >
         {showPassword ? (
           <EyeOff className="h-4 w-4" />
         ) : (
           <Eye className="h-4 w-4" />
         )}
-      </Button>
+      </button>
     </div>
   );
 }

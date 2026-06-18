@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrdersChart } from "@/components/dashboard/orders-chart";
-import { DashboardContainer } from "@/components/layout/dashoard-container";
+import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 const stats = [
   {
@@ -72,7 +72,6 @@ export default function AdminDashboardPage() {
         title="Yönetim Paneli"
         description="Sipariş operasyonunu canlı olarak yönetin."
       />
-
       <DashboardContainer>
         {/* HERO */}
 

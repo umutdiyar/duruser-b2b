@@ -5,7 +5,7 @@ import { Building2, Plus, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { DashboardContainer } from "@/components/layout/dashoard-container";
+import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 import { Card, CardContent } from "@/components/ui/card";
 

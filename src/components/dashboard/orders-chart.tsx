@@ -8,6 +8,7 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
+import { CardContent } from "../ui/card";
 
 const data = [
   {
@@ -43,7 +44,7 @@ const data = [
 export function OrdersChart() {
   return (
     <div className="h-[260px] lg:h-[320px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <CardContent className="h-[350px]">
         <AreaChart data={data}>
           <defs>
             <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
@@ -68,7 +69,7 @@ export function OrdersChart() {
             strokeWidth={3}
           />
         </AreaChart>
-      </ResponsiveContainer>
+      </CardContent>
     </div>
   );
 }
