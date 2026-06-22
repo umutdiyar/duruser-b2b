@@ -1,27 +1,24 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import {
+  CheckCircle2,
+  Pencil,
   Package,
   Plus,
   Search,
-  Tag,
-  CheckCircle2,
   XCircle,
-  Pencil,
 } from "lucide-react";
 
-import { prisma } from "@/lib/prisma";
-
-import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { toggleProductStatusAction } from "@/actions/product-actions";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
-
-import { Card, CardContent } from "@/components/ui/card";
-
-import { Button } from "@/components/ui/button";
-
-import { Input } from "@/components/ui/input";
-
+import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { RouteToast } from "@/components/shared/route-toast";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { prisma } from "@/lib/prisma";
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
@@ -31,7 +28,6 @@ export default async function ProductsPage() {
   });
 
   const activeProducts = products.filter((product) => product.isActive).length;
-
   const passiveProducts = products.filter(
     (product) => !product.isActive,
   ).length;
@@ -41,118 +37,142 @@ export default async function ProductsPage() {
       <DashboardHeader
         title="Ürün Yönetimi"
         description="Ürün kataloğunu yönetin."
+        actions={
+          <Button
+            asChild
+            className="h-11 rounded-2xl bg-orange-500 px-5 font-semibold hover:bg-orange-600"
+          >
+            <Link href="/admin/products/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Yeni Ürün
+            </Link>
+          </Button>
+        }
       />
 
+      <RouteToast />
+
       <DashboardContainer>
-        {/* HERO */}
+        <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 text-white shadow-xl">
+          <CardContent className="p-6 lg:p-8">
+            <div className="max-w-3xl">
+              <Badge className="border-0 bg-white/15 text-white hover:bg-white/15">
+                Ürün Yönetimi
+              </Badge>
 
-        <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 text-white shadow-xl ">
-          <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
-            <div>
-              <p className="text-sm text-orange-100">Ürün Yönetimi</p>
-
-              <h2 className="mt-3 text-4xl font-bold lg:text-5xl">
+              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
                 Ürün Kataloğu
               </h2>
 
-              <p className="mt-4 max-w-xl text-orange-100">
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-orange-100 sm:text-base">
                 DuruSer müşterilerine sunulan ürünleri yönetin, aktif/pasif
-                durumlarını takip edin ve yeni ürünler ekleyin.
+                durumlarını takip edin ve ürün bilgilerini güncelleyin.
               </p>
             </div>
-
-            <Button className="h-12 bg-white px-6 text-orange-600 hover:bg-orange-50">
-              <Plus className="mr-2 h-4 w-4" />
-              Yeni Ürün
-            </Button>
           </CardContent>
         </Card>
 
-        {/* STATS */}
-
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <Package className="h-6 w-6 text-orange-500" />
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Toplam Ürün</p>
+                  <p className="mt-2 text-3xl font-bold sm:text-4xl">
+                    {products.length}
+                  </p>
+                </div>
 
-              <p className="mt-4 text-sm text-muted-foreground">Toplam Ürün</p>
-
-              <p className="mt-2 text-4xl font-bold">{products.length}</p>
+                <div className="rounded-2xl bg-orange-100 p-3 text-orange-600">
+                  <Package className="h-5 w-5" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <CheckCircle2 className="h-6 w-6 text-green-500" />
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Aktif Ürün</p>
+                  <p className="mt-2 text-3xl font-bold sm:text-4xl">
+                    {activeProducts}
+                  </p>
+                </div>
 
-              <p className="mt-4 text-sm text-muted-foreground">Aktif Ürün</p>
-
-              <p className="mt-2 text-4xl font-bold">{activeProducts}</p>
+                <div className="rounded-2xl bg-green-100 p-3 text-green-600">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <XCircle className="h-6 w-6 text-red-500" />
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Pasif Ürün</p>
+                  <p className="mt-2 text-3xl font-bold sm:text-4xl">
+                    {passiveProducts}
+                  </p>
+                </div>
 
-              <p className="mt-4 text-sm text-muted-foreground">Pasif Ürün</p>
-
-              <p className="mt-2 text-4xl font-bold">{passiveProducts}</p>
+                <div className="rounded-2xl bg-red-100 p-3 text-red-600">
+                  <XCircle className="h-5 w-5" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* SEARCH */}
-
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="relative">
-              <Search className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-              <Input placeholder="Ürün ara..." className="pl-10" />
+              <Input
+                placeholder="Ürün ara..."
+                className="h-12 rounded-2xl pl-10"
+              />
             </div>
           </CardContent>
         </Card>
-
-        {/* PRODUCTS */}
 
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {products.map((product) => (
             <Card
               key={product.id}
-              className="overflow-hidden border-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group overflow-hidden border-0 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              {/* IMAGE */}
-
-              <div className="relative h-44 bg-slate-100">
+              <div className="relative h-48 overflow-hidden bg-slate-100">
                 {product.imageUrl ? (
                   <Image
                     src={product.imageUrl}
                     alt={product.name}
                     fill
-                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                    className="object-cover transition duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center">
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
                     <Package className="h-14 w-14 text-slate-300" />
                   </div>
                 )}
 
+                <div className="absolute left-3 top-3">
+                  <Badge className="border-0 bg-white/90 text-slate-700 shadow-sm backdrop-blur hover:bg-white/90">
+                    #{product.id.slice(-6)}
+                  </Badge>
+                </div>
+
                 <div className="absolute right-3 top-3">
                   {product.isActive ? (
-                    <Badge
-                      className={
-                        product.isActive
-                          ? "bg-emerald-500 text-white"
-                          : "bg-red-500 text-white"
-                      }
-                    >
-                      {" "}
+                    <Badge className="border-0 bg-emerald-500 text-white shadow-sm hover:bg-emerald-500">
                       <CheckCircle2 className="mr-1 h-3 w-3" />
                       Aktif
                     </Badge>
                   ) : (
-                    <Badge variant="destructive">
+                    <Badge className="border-0 bg-red-500 text-white shadow-sm hover:bg-red-500">
                       <XCircle className="mr-1 h-3 w-3" />
                       Pasif
                     </Badge>
@@ -160,39 +180,64 @@ export default async function ProductsPage() {
                 </div>
               </div>
 
-              {/* CONTENT */}
+              <CardContent className="flex min-h-[260px] flex-col p-5">
+                <div className="min-w-0">
+                  <h3 className="line-clamp-1 text-lg font-bold text-slate-900">
+                    {product.name}
+                  </h3>
 
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold">{product.name}</h3>
-
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      #{product.id.slice(-6)}
-                    </p>
-                  </div>
-
-                  <Tag className="h-5 w-5 text-orange-500" />
+                  <p className="mt-3 line-clamp-2 min-h-[40px] text-sm leading-5 text-muted-foreground">
+                    {product.description || "Bu ürün için açıklama eklenmemiş."}
+                  </p>
                 </div>
 
-                <p className="mt-4 line-clamp-2 min-h-[40px] text-sm text-muted-foreground">
-                  {product.description || "Bu ürün için açıklama eklenmemiş."}
-                </p>
+                <div className="mt-5 rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Güncel Fiyat
+                  </p>
 
-                <div className="mt-6 flex items-center justify-between border-t pt-4">
-                  {" "}
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      Güncel Fiyat
-                    </p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">
+                    ₺{product.price.toLocaleString("tr-TR")}
+                  </p>
+                </div>
 
-                    <p className="text-2xl font-bold">
-                      ₺{product.price.toLocaleString("tr-TR")}
-                    </p>
-                  </div>
-                  <Button variant="outline" className="rounded-xl">
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Düzenle
+                <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
+                  <form action={toggleProductStatusAction}>
+                    <input type="hidden" name="productId" value={product.id} />
+                    <input
+                      type="hidden"
+                      name="currentStatus"
+                      value={String(product.isActive)}
+                    />
+
+                    <Button
+                      type="submit"
+                      variant={product.isActive ? "outline" : "default"}
+                      className="h-11 w-full rounded-2xl"
+                    >
+                      {product.isActive ? (
+                        <>
+                          <XCircle className="mr-2 h-4 w-4" />
+                          Pasife Al
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          Aktife Al
+                        </>
+                      )}
+                    </Button>
+                  </form>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-11 rounded-2xl"
+                  >
+                    <Link href={`/admin/products/${product.id}/edit`}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Düzenle
+                    </Link>
                   </Button>
                 </div>
               </CardContent>

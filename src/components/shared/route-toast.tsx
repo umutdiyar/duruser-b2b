@@ -47,6 +47,36 @@ const toastMessages: Record<
     message: "Çıkış yapıldı.",
     description: "Oturum güvenli şekilde sonlandırıldı.",
   },
+
+  productCreated: {
+    type: "success",
+    message: "Ürün oluşturuldu.",
+    description: "Yeni ürün kataloğa eklendi.",
+  },
+
+  productUpdated: {
+    type: "success",
+    message: "Ürün güncellendi.",
+    description: "Ürün bilgileri başarıyla kaydedildi.",
+  },
+
+  productStatusUpdated: {
+    type: "success",
+    message: "Ürün durumu güncellendi.",
+    description: "Ürün aktif/pasif durumu değiştirildi.",
+  },
+
+  productActivated: {
+    type: "success",
+    message: "Ürün aktife alındı.",
+    description: "Ürün müşteri tarafında siparişe açıldı.",
+  },
+
+  productDeactivated: {
+    type: "success",
+    message: "Ürün pasife alındı.",
+    description: "Ürün müşteri tarafında artık görünmeyecek.",
+  },
 };
 
 export function RouteToast() {
