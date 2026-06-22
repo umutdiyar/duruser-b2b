@@ -33,7 +33,7 @@ export default async function LoginPage({
 
   const error = params?.error;
   return (
-    <main className="min-h-screen bg-[#f5f7fb]">
+    <main className="min-h-screen  h-full bg-[#f5f7fb]">
       <div className="grid min-h-screen lg:grid-cols-2">
         <section className="relative hidden overflow-hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="absolute left-[-120px] top-[-120px] h-80 w-80 rounded-full bg-orange-500/30 blur-3xl" />

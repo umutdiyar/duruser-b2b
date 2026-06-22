@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   ArrowUpRight,
   ShoppingCart,
@@ -5,6 +7,7 @@ import {
   Clock3,
   Truck,
 } from "lucide-react";
+
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,100 +15,122 @@ import { Button } from "@/components/ui/button";
 import { OrdersChart } from "@/components/dashboard/orders-chart";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 
-const stats = [
-  {
-    title: "Toplam Sipariş",
-    value: "124",
-    growth: "+12%",
-    icon: ShoppingCart,
-  },
+import { prisma } from "@/lib/prisma";
+import { formatCurrency } from "@/lib/format";
+import {
+  getOrderStatusClassName,
+  getOrderStatusLabel,
+} from "@/lib/order-status";
 
-  {
-    title: "Hazırlanan",
-    value: "18",
-    growth: "+4%",
-    icon: Clock3,
-  },
+export default async function AdminDashboardPage() {
+  const [orders, companies, products] = await Promise.all([
+    prisma.order.findMany({
+      include: {
+        company: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+    }),
+    prisma.company.count(),
+    prisma.product.count(),
+  ]);
 
-  {
-    title: "Sevkiyatta",
-    value: "9",
-    growth: "+2%",
-    icon: Truck,
-  },
+  const totalOrders = await prisma.order.count();
 
-  {
-    title: "Teslim Edilen",
-    value: "97",
-    growth: "+18%",
-    icon: PackageCheck,
-  },
-];
+  const pendingOrders = await prisma.order.count({
+    where: {
+      status: "PENDING",
+    },
+  });
 
-const recentOrders = [
-  {
-    company: "ABC Market",
-    orderNo: "DRS-1001",
-    amount: "₺4.250",
-    status: "Hazırlanıyor",
-  },
+  const shippedOrders = await prisma.order.count({
+    where: {
+      status: "SHIPPED",
+    },
+  });
 
-  {
-    company: "Mavi Plaza",
-    orderNo: "DRS-1002",
-    amount: "₺2.190",
-    status: "Yeni Sipariş",
-  },
+  const deliveredOrders = await prisma.order.count({
+    where: {
+      status: "DELIVERED",
+    },
+  });
 
-  {
-    company: "Yıldız Cafe",
-    orderNo: "DRS-1003",
-    amount: "₺6.820",
-    status: "Teslim Edildi",
-  },
-];
+  const stats = [
+    {
+      title: "Toplam Sipariş",
+      value: totalOrders,
+      description: `${companies} Firma: ${products} ürün`,
+      icon: ShoppingCart,
+    },
+    {
+      title: "Yeni Sipariş",
+      value: pendingOrders,
+      description: "İşlem bekleyen sipariş",
+      icon: Clock3,
+    },
+    {
+      title: "Sevkiyatta",
+      value: shippedOrders,
+      description: "Teslimat sürecinde",
+      icon: Truck,
+    },
+    {
+      title: "Teslim Edilen",
+      value: deliveredOrders,
+      description: "Tamamlanan sipariş",
+      icon: PackageCheck,
+    },
+  ];
 
-export default function AdminDashboardPage() {
   return (
     <>
       <DashboardHeader
         title="Yönetim Paneli"
-        description="Sipariş operasyonunu canlı olarak yönetin."
+        description="DuruSer operasyonunu tek merkezden yönetin."
+        actions={
+          <Button
+            asChild
+            className="h-11 rounded-2xl bg-orange-500 px-5 font-semibold hover:bg-orange-600"
+          >
+            <Link href="/admin/orders">
+              Siparişleri Gör
+              <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        }
       />
       <DashboardContainer>
         {/* HERO */}
 
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 to-orange-600 via-orange-500 text-white shadow-2xl">
           <CardContent className="flex flex-col gap-8 p-6 lg:p-8 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <Badge className="border-0 bg-white/20 text-white hover:bg-white/20">
+            <div className="min-w-0">
+              <Badge className="border-0 bg-white/15 text-white hover:bg-white/15">
                 DuruSer B2B
               </Badge>
 
-              <h2 className="mt-4 text-4xl lg:text-5xl leading-tight font-bold tracking-tight">
+              <h2 className="mt-4 text-3xl lg:text-5xl leading-tight font-bold tracking-tight sm:text-4xl">
                 Operasyon Merkezi
               </h2>
 
-              <p className="mt-3 max-w-xl text-orange-100">
-                Siparişleri yönetin, sevkiyatları takip edin ve müşteri
-                operasyonlarını tek panelden kontrol edin.
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-orange-100 sm:text-base">
+                Müşteri siparişlerini, ürün kataloglarını ve firma
+                operasyonlarını tek panelden takip edin.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                variant="secondary"
-                className="border-0 bg-white text-primary hover:bg-white/90"
-              >
-                Siparişler
-              </Button>
+            <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[360px]">
+              <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <p className="text-sm text-orange-100">Toplam Firma</p>
+                <p className="mt-2 text-3xl font-bold">{companies}</p>
+              </div>
 
-              <Button
-                variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:bg-white/20"
-              >
-                Raporlar
-              </Button>
+              <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <p className="text-sm text-orange-100">Toplam Ürün</p>
+                <p className="mt-2 text-3xl font-bold">{products}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -121,32 +146,26 @@ export default function AdminDashboardPage() {
                 key={stat.title}
                 className="border-0 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 ">
+                      <p className="text-sm text-muted-foreground truncate">
                         {stat.title}
                       </p>
 
-                      <p className="mt-3 text-4xl font-bold tracking-tight">
+                      <p className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
                         {stat.value}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+                    <div className="rounded-2xl bg-orange-100 p-3 shrink-0 text-orange-600">
                       <Icon className="h-5 w-5" />
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center gap-2">
-                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                      {stat.growth}
-                    </Badge>
-
-                    <p className="text-xs text-muted-foreground">
-                      geçen haftaya göre
-                    </p>
-                  </div>
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    {stat.description}
+                  </p>
                 </CardContent>
               </Card>
             );
@@ -155,14 +174,16 @@ export default function AdminDashboardPage() {
 
         {/* CHART + ACTIVITY */}
 
-        <div className="grid gap-4 xl:grid-cols-3 lg:gap-6">
-          <Card className="border-0 shadow-sm xl:col-span-2">
+        <div className="grid gap-6 xl:grid-cols-3 ">
+          <Card className="border-0 min-w-0 shadow-sm xl:col-span-2">
             <CardHeader>
               <CardTitle>Haftalık Sipariş Analizi</CardTitle>
             </CardHeader>
 
             <CardContent>
-              <OrdersChart />
+              <div className="min-w-0 h-[260px] sm:h-[320px]">
+                <OrdersChart />
+              </div>
             </CardContent>
           </Card>
 
@@ -171,17 +192,19 @@ export default function AdminDashboardPage() {
               <CardTitle>Son Aktiviteler</CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-4">
               {[
-                "ABC Market yeni sipariş oluşturdu.",
-                "Yıldız Cafe siparişi teslim edildi.",
-                "Mavi Plaza sevkiyata çıktı.",
-                "Yeni müşteri hesabı oluşturuldu.",
+                `${pendingOrders} yeni sipariş işlem bekliyor.`,
+                `${shippedOrders} sipariş sevkiyat sürecinde.`,
+                `${deliveredOrders} sipariş teslim edildi.`,
+                `${products} ürün katalogda yer alıyor.`,
               ].map((activity) => (
-                <div key={activity} className="flex gap-3">
-                  <div className="mt-2 h-2 w-2 rounded-full bg-primary" />
-
-                  <p className="text-sm text-muted-foreground">{activity}</p>
+                <div
+                  key={activity}
+                  className="flex gap-3 rounded-2xl bg-slate-50 p-4"
+                >
+                  <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
+                  <p className="text-sm leading-6 text-slate-600">{activity}</p>
                 </div>
               ))}
             </CardContent>
@@ -191,46 +214,49 @@ export default function AdminDashboardPage() {
         {/* RECENT ORDERS */}
 
         <Card className="border-0 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Son Siparişler</CardTitle>
 
-            <Button variant="outline">
-              Tümünü Gör
-              <ArrowUpRight className="ml-2 h-4 w-4" />
+            <Button variant="outline" className="rounded-2xl">
+              <Link href="/admin/orders">
+                Tümünü Gör
+                <ArrowUpRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {recentOrders.map((order) => (
-              <div
-                key={order.orderNo}
-                className="flex items-center justify-between rounded-2xl border bg-white p-5 transition hover:shadow-md"
-              >
-                <div>
-                  <p className="text-sm font-semibold">{order.company}</p>
-
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {order.orderNo}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <Badge
-                    className={
-                      order.status === "Hazırlanıyor"
-                        ? "bg-orange-100 text-orange-700"
-                        : order.status === "Yeni Sipariş"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-green-100 text-green-700"
-                    }
-                  >
-                    {order.status}
-                  </Badge>
-
-                  <p className="text-sm font-bold">{order.amount}</p>
-                </div>
+            {orders.length === 0 ? (
+              <div className="rounded-3xl border bg-white p-8 text-center text-sm text-muted-foreground">
+                Henüz sipariş bulunmuyor.
               </div>
-            ))}
+            ) : (
+              orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="flex min-w-0 flex-col gap-4 rounded-3xl border bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">
+                      {order.company.name}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {order.orderNumber}
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 flex-wrap items-center gap-3">
+                    <Badge className={getOrderStatusClassName(order.status)}>
+                      {getOrderStatusLabel(order.status)}
+                    </Badge>
+
+                    <p className="font-bold">
+                      {formatCurrency(order.totalPrice)}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       </DashboardContainer>
