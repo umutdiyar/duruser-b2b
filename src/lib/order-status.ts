@@ -1,16 +1,51 @@
 import type { OrderStatus } from "@/generated/prisma/client";
 
-export function getOrderStatusLabel(status: OrderStatus) {
-  const labels: Record<OrderStatus, string> = {
-    PENDING: "Yeni Sipariş",
-    CONFIRMED: "Onaylandı",
-    PREPARING: "Hazırlanıyor",
-    SHIPPED: "Sevkiyatta",
-    DELIVERED: "Teslim Edildi",
-    CANCELLED: "İptal",
-  };
+export const orderStatuses: {
+  value: OrderStatus;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: "PENDING",
+    label: "Yeni Sipariş",
+    description: "Sipariş yeni oluşturuldu.",
+  },
+  {
+    value: "CONFIRMED",
+    label: "Onaylandı",
+    description: "Sipariş DuruSer tarafından onaylandı.",
+  },
+  {
+    value: "PREPARING",
+    label: "Hazırlanıyor",
+    description: "Sipariş hazırlık aşamasında.",
+  },
+  {
+    value: "SHIPPED",
+    label: "Sevkiyatta",
+    description: "Sipariş sevkiyata çıktı.",
+  },
+  {
+    value: "DELIVERED",
+    label: "Teslim Edildi",
+    description: "Sipariş teslim edildi.",
+  },
+  {
+    value: "CANCELLED",
+    label: "İptal",
+    description: "Sipariş iptal edildi.",
+  },
+];
 
-  return labels[status];
+export function getOrderStatusLabel(status: OrderStatus) {
+  return orderStatuses.find((item) => item.value === status)?.label ?? status;
+}
+
+export function getOrderStatusDescription(status: OrderStatus) {
+  return (
+    orderStatuses.find((item) => item.value === status)?.description ??
+    "Durum bilgisi bulunamadı."
+  );
 }
 
 export function getOrderStatusClassName(status: OrderStatus) {
