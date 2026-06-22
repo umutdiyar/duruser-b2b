@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PackageCheck, Plus } from "lucide-react";
+import { PackageCheck, Plus, ArrowUpRight } from "lucide-react";
 
 import { auth } from "../../../../auth";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +9,7 @@ import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RouteToast } from "@/components/shared/route-toast";
 
 function getStatusLabel(status: string) {
   const labels: Record<string, string> = {
@@ -60,6 +61,8 @@ export default async function CustomerOrdersPage({
         title="Siparişlerim"
         description="Sipariş geçmişinizi görüntüleyin."
       />
+
+      <RouteToast />
 
       <DashboardContainer>
         {created ? (
@@ -137,6 +140,15 @@ export default async function CustomerOrdersPage({
                         </span>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-5 flex justify-end">
+                    <Button asChild variant="outline" className="rounded-2xl">
+                      <Link href={`/customer/orders/${order.id}`}>
+                        Detayı Gör
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))

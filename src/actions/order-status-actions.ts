@@ -27,5 +27,5 @@ export async function updateOrderStatusAction(formData: FormData) {
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/customer/orders");
 
-  redirect(`/admin/orders/${orderId}`);
+  redirect(`/admin/orders/${orderId}?toast=orderStatusUpdated`);
 }

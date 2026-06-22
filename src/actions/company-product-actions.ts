@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 export async function updateCompanyProducts(formData: FormData) {
   const companyId = formData.get("companyId") as string;
@@ -28,4 +29,6 @@ export async function updateCompanyProducts(formData: FormData) {
   }
 
   revalidatePath(`/admin/customers/${companyId}`);
+
+  redirect(`/admin/customers/${companyId}?toast=productsUpdated`);
 }

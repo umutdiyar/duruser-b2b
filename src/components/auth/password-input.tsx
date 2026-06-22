@@ -18,7 +18,6 @@ export function PasswordInput({ name }: PasswordInputProps) {
         name={name}
         type={showPassword ? "text" : "password"}
         placeholder="Şifreniz"
-        required
         autoComplete="current-password"
         className="h-12 rounded-2xl pr-14"
       />

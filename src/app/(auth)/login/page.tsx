@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 import { Label } from "@/components/ui/label";
+import { RouteToast } from "@/components/shared/route-toast";
 
 export default async function LoginPage({
   searchParams,
@@ -34,6 +35,7 @@ export default async function LoginPage({
   const error = params?.error;
   return (
     <main className="min-h-screen  h-full bg-[#f5f7fb]">
+      <RouteToast />
       <div className="grid min-h-screen lg:grid-cols-2">
         <section className="relative hidden overflow-hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="absolute left-[-120px] top-[-120px] h-80 w-80 rounded-full bg-orange-500/30 blur-3xl" />
@@ -177,7 +179,6 @@ export default async function LoginPage({
                     name="email"
                     type="email"
                     placeholder="admin@duruser.com"
-                    required
                     className="h-12 rounded-2xl"
                   />
                 </div>

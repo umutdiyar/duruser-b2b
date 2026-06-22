@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RouteToast } from "@/components/shared/route-toast";
 
 export default async function CompanyDetailPage({
   params,
@@ -84,6 +85,8 @@ export default async function CompanyDetailPage({
         title={company.name}
         description="Firma bilgileri ve ürün yetkilendirmesi."
       />
+
+      <RouteToast />
 
       <DashboardContainer>
         {" "}

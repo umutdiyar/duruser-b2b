@@ -86,5 +86,5 @@ export async function createOrderAction(formData: FormData) {
     },
   });
 
-  redirect(`/customer/orders?created=${order.orderNumber}`);
+  redirect(`/customer/orders?toast=orderCreated`);
 }

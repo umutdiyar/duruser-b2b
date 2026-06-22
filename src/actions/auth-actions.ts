@@ -22,15 +22,15 @@ export async function loginAction(formData: FormData) {
     }
 
     if (error instanceof AuthError) {
-      redirect("/login?error=credentials");
+      redirect("/login?toast=loginError");
     }
 
-    redirect("/login?error=unexpected");
+    redirect("/login?toast=unexpectedError");
   }
 }
 
 export async function logoutAction() {
   await signOut({
-    redirectTo: "/login",
+    redirectTo: "/login?toast=logoutSuccess",
   });
 }
