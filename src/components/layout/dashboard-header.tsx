@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 type DashboardHeaderProps = {
   title: string;
   description?: string;
+  actions?: React.ReactNode;
 };
 
-export function DashboardHeader({ title, description }: DashboardHeaderProps) {
+export function DashboardHeader({
+  title,
+  description,
+  actions,
+}: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
-      <div className="flex min-h-[72px] items-center justify-between gap-3 py-3 pl-20 pr-4 sm:px-6 lg:min-h-20 lg:px-10">
+      <div className="flex min-h-[72px] items-center justify-between gap-3 py-3 pl-20 pr-4 sm:px-6 lg:min-h-20 lg:px-10 ">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
             {title}
@@ -25,6 +30,8 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+          {actions ? <div className="hidden md:flex">{actions}</div> : null}
+
           <Button
             type="button"
             size="icon"
@@ -58,6 +65,12 @@ export function DashboardHeader({ title, description }: DashboardHeaderProps) {
           </form>
         </div>
       </div>
+
+      {actions ? (
+        <div className="border-t border-slate-100 px-4 py-3 sm:hidden">
+          {actions}
+        </div>
+      ) : null}
     </header>
   );
 }

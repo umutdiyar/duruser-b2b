@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   History,
@@ -16,57 +16,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-
-const adminLinks = [
-  {
-    label: "Dashboard",
-    href: "/admin/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Siparişler",
-    href: "/admin/orders",
-    icon: ShoppingCart,
-  },
-  {
-    label: "Müşteriler",
-    href: "/admin/customers",
-    icon: Users,
-  },
-  {
-    label: "Ürünler",
-    href: "/admin/products",
-    icon: Package,
-  },
-  {
-    label: "Ayarlar",
-    href: "/admin/settings",
-    icon: Settings,
-  },
-];
-
-const customerLinks = [
-  {
-    label: "Dashboard",
-    href: "/customer/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Ürünlerim",
-    href: "/customer/products",
-    icon: Package,
-  },
-  {
-    label: "Yeni Sipariş",
-    href: "/customer/new-order",
-    icon: ShoppingCart,
-  },
-  {
-    label: "Siparişlerim",
-    href: "/customer/orders",
-    icon: History,
-  },
-];
+import { adminNavigation, customerNavigation } from "@/constants/navigation";
 
 type DashboardSidebarProps = {
   role: "admin" | "customer";
@@ -80,7 +30,7 @@ function SidebarContent({
 }) {
   const pathname = usePathname();
 
-  const links = role === "admin" ? adminLinks : customerLinks;
+  const links = role === "admin" ? adminNavigation : customerNavigation;
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -131,7 +81,7 @@ function SidebarContent({
                   )}
                 />
 
-                <span className="truncate">{link.label}</span>
+                <span className="truncate">{link.title}</span>
               </Link>
             );
           })}
@@ -153,6 +103,14 @@ function SidebarContent({
 
 export function DashboardSidebar({ role }: DashboardSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   return (
     <>
