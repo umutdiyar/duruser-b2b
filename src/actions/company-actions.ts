@@ -1,33 +1,97 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 
-export async function deleteCompanyAction(companyId: string) {
-  await prisma.companyProduct.deleteMany({
+function createSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replaceAll("ı", "i")
+    .replaceAll("ğ", "g")
+    .replaceAll("ü", "u")
+    .replaceAll("ş", "s")
+    .replaceAll("ö", "o")
+    .replaceAll("ç", "c")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export async function createCompanyAction(formData: FormData) {
+  const name = formData.get("name") as string;
+  const rawSlug = formData.get("slug") as string;
+
+  if (!name?.trim()) {
+    throw new Error("Firma adı zorunludur.");
+  }
+
+  const slug = rawSlug?.trim() ? createSlug(rawSlug) : createSlug(name);
+
+  const existingCompany = await prisma.company.findUnique({
     where: {
-      companyId,
+      slug,
     },
   });
 
-  await prisma.user.deleteMany({
-    where: {
-      companyId,
+  if (existingCompany) {
+    redirect("/admin/customers/new?toast=unexpectedError");
+  }
+
+  await prisma.company.create({
+    data: {
+      name: name.trim(),
+      slug,
     },
   });
 
-  await prisma.order.deleteMany({
+  revalidatePath("/admin/customers");
+
+  redirect("/admin/customers?toast=companyCreated");
+}
+
+export async function updateCompanyAction(formData: FormData) {
+  const companyId = formData.get("companyId") as string;
+  const name = formData.get("name") as string;
+  const rawSlug = formData.get("slug") as string;
+
+  if (!companyId) {
+    throw new Error("Firma bulunamadı.");
+  }
+
+  if (!name?.trim()) {
+    throw new Error("Firma adı zorunludur.");
+  }
+
+  const slug = rawSlug?.trim() ? createSlug(rawSlug) : createSlug(name);
+
+  const existingCompany = await prisma.company.findFirst({
     where: {
-      companyId,
+      slug,
+      NOT: {
+        id: companyId,
+      },
     },
   });
 
-  await prisma.company.delete({
+  if (existingCompany) {
+    redirect(`/admin/customers/${companyId}/edit?toast=unexpectedError`);
+  }
+
+  await prisma.company.update({
     where: {
       id: companyId,
     },
+    data: {
+      name: name.trim(),
+      slug,
+    },
   });
 
-  redirect("/admin/customers");
+  revalidatePath("/admin/customers");
+  revalidatePath(`/admin/customers/${companyId}`);
+  revalidatePath(`/admin/customers/${companyId}/edit`);
+
+  redirect("/admin/customers?toast=companyUpdated");
 }

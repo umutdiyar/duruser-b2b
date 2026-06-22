@@ -77,6 +77,30 @@ const toastMessages: Record<
     message: "Ürün pasife alındı.",
     description: "Ürün müşteri tarafında artık görünmeyecek.",
   },
+
+  companyCreated: {
+    type: "success",
+    message: "Firma oluşturuldu.",
+    description: "Yeni müşteri firma sisteme eklendi.",
+  },
+
+  companyUpdated: {
+    type: "success",
+    message: "Firma güncellendi.",
+    description: "Firma bilgileri başarıyla kaydedildi.",
+  },
+
+  userCreated: {
+    type: "success",
+    message: "Kullanıcı oluşturuldu.",
+    description: "Firma kullanıcısı sisteme eklendi.",
+  },
+
+  userUpdated: {
+    type: "success",
+    message: "Kullanıcı güncellendi.",
+    description: "Kullanıcı bilgileri başarıyla kaydedildi.",
+  },
 };
 
 export function RouteToast() {

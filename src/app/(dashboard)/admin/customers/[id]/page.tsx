@@ -7,6 +7,8 @@ import {
   Save,
   ShoppingCart,
   User,
+  Pencil,
+  Plus,
 } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
@@ -84,6 +86,14 @@ export default async function CompanyDetailPage({
       <DashboardHeader
         title={company.name}
         description="Firma bilgileri ve ürün yetkilendirmesi."
+        actions={
+          <Button asChild variant="outline" className="h-11 rounded-2xl">
+            <Link href={`/admin/customers/${company.id}/edit`}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Firmayı Düzenle
+            </Link>
+          </Button>
+        }
       />
 
       <RouteToast />
@@ -212,8 +222,18 @@ export default async function CompanyDetailPage({
 
           <div className="space-y-6">
             <Card className="border-0 shadow-sm">
-              <CardHeader>
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle>Kullanıcılar</CardTitle>
+
+                <Button
+                  asChild
+                  className="h-10 rounded-2xl bg-orange-500 hover:bg-orange-600"
+                >
+                  <Link href={`/admin/customers/${company.id}/users/new`}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Yeni Kullanıcı
+                  </Link>
+                </Button>
               </CardHeader>
 
               <CardContent className="space-y-3">
@@ -223,19 +243,38 @@ export default async function CompanyDetailPage({
                       key={user.id}
                       className="rounded-2xl border bg-white p-4"
                     >
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {user.email}
-                      </p>
-                      <Badge variant="outline" className="mt-3">
-                        {user.role}
-                      </Badge>
+                      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold">{user.name}</p>
+
+                          <p className="mt-1 truncate text-sm text-muted-foreground">
+                            {user.email}
+                          </p>
+
+                          <Badge variant="outline" className="mt-3">
+                            {user.role}
+                          </Badge>
+                        </div>
+
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="h-10 rounded-2xl"
+                        >
+                          <Link
+                            href={`/admin/customers/${company.id}/users/${user.id}/edit`}
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Düzenle
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">
+                  <div className="rounded-2xl border bg-white p-5 text-sm text-muted-foreground">
                     Bu firmaya bağlı kullanıcı yok.
-                  </p>
+                  </div>
                 )}
               </CardContent>
             </Card>

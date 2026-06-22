@@ -1,16 +1,12 @@
 import Link from "next/link";
 
-import { Building2, Plus, Users } from "lucide-react";
+import { ArrowUpRight, Building2, Pencil, Plus, Users } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
-
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
-
+import { RouteToast } from "@/components/shared/route-toast";
 import { Card, CardContent } from "@/components/ui/card";
-
-// import { deleteCompanyAction } from "@/actions/company-actions";
-
 import { Button } from "@/components/ui/button";
 
 export default async function CustomersPage() {
@@ -18,115 +14,182 @@ export default async function CustomersPage() {
     include: {
       users: true,
       orders: true,
+      companyProducts: true,
     },
     orderBy: {
       name: "asc",
     },
   });
 
+  const totalUsers = companies.reduce(
+    (acc, company) => acc + company.users.length,
+    0,
+  );
+
+  const totalOrders = companies.reduce(
+    (acc, company) => acc + company.orders.length,
+    0,
+  );
+
   return (
     <>
       <DashboardHeader
-        title="Firma Yönetimi"
-        description="Müşterileri yönetin."
-      />
-
-      <DashboardContainer>
-        {/* HERO */}
-
-        <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
-          <CardContent className="flex flex-col gap-6 p-8 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm text-slate-400">Firma Yönetimi</p>
-
-              <h2 className="mt-3 text-4xl font-bold">Müşteriler</h2>
-
-              <p className="mt-3 max-w-xl text-slate-300">
-                Firma hesaplarını yönetin ve ürün yetkilendirmelerini
-                düzenleyin.
-              </p>
-            </div>
-
-            <Button className="bg-orange-500 hover:bg-orange-600">
+        title="Müşteri Yönetimi"
+        description="Müşteri firmaları ve ürün yetkilerini yönetin."
+        actions={
+          <Button
+            asChild
+            className="h-11 rounded-2xl bg-orange-500 px-5 font-semibold hover:bg-orange-600"
+          >
+            <Link href="/admin/customers/new">
               <Plus className="mr-2 h-4 w-4" />
               Yeni Firma
-            </Button>
+            </Link>
+          </Button>
+        }
+      />
+
+      <RouteToast />
+
+      <DashboardContainer>
+        <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
+          <CardContent className="p-6 lg:p-8">
+            <div className="max-w-3xl">
+              <p className="text-sm text-slate-400">Firma Yönetimi</p>
+
+              <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+                Müşteri Firmalar
+              </h2>
+
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
+                Müşteri firmaları yönetin, kullanıcılarını takip edin ve firma
+                bazlı ürün yetkilendirmelerini düzenleyin.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        {/* STATS */}
-
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <Building2 className="h-6 w-6 text-orange-500" />
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Toplam Firma</p>
+                  <p className="mt-2 text-3xl font-bold sm:text-4xl">
+                    {companies.length}
+                  </p>
+                </div>
 
-              <p className="mt-4 text-sm text-muted-foreground">Toplam Firma</p>
-
-              <p className="mt-2 text-4xl font-bold">{companies.length}</p>
+                <div className="rounded-2xl bg-orange-100 p-3 text-orange-600">
+                  <Building2 className="h-5 w-5" />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <Users className="h-6 w-6 text-orange-500" />
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Toplam Kullanıcı
+                  </p>
+                  <p className="mt-2 text-3xl font-bold sm:text-4xl">
+                    {totalUsers}
+                  </p>
+                </div>
 
-              <p className="mt-4 text-sm text-muted-foreground">
-                Toplam Kullanıcı
-              </p>
+                <div className="rounded-2xl bg-blue-100 p-3 text-blue-600">
+                  <Users className="h-5 w-5" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              <p className="mt-2 text-4xl font-bold">
-                {companies.reduce(
-                  (acc, company) => acc + company.users.length,
-                  0,
-                )}
-              </p>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Toplam Sipariş
+                  </p>
+                  <p className="mt-2 text-3xl font-bold sm:text-4xl">
+                    {totalOrders}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl bg-green-100 p-3 text-green-600">
+                  <ArrowUpRight className="h-5 w-5" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
-
-        {/* COMPANIES */}
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {companies.map((company) => (
             <Card
               key={company.id}
-              className="border-0 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
+              className="border-0 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              <CardContent className="p-6">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100">
-                  <Building2 className="h-6 w-6 text-orange-500" />
+              <CardContent className="flex h-full flex-col p-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+                    <Building2 className="h-6 w-6" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="line-clamp-1 text-lg font-bold text-slate-900">
+                      {company.name}
+                    </h3>
+
+                    <p className="mt-1 truncate text-sm text-muted-foreground">
+                      {company.slug}
+                    </p>
+                  </div>
                 </div>
 
-                <h3 className="mt-5 text-lg font-semibold">{company.name}</h3>
+                <div className="mt-6 grid grid-cols-3 gap-3 rounded-2xl bg-slate-50 p-4 text-center">
+                  <div>
+                    <p className="text-lg font-bold">{company.users.length}</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Kullanıcı
+                    </p>
+                  </div>
 
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {company.slug}
-                </p>
+                  <div>
+                    <p className="text-lg font-bold">{company.orders.length}</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Sipariş
+                    </p>
+                  </div>
 
-                <div className="mt-6 flex items-center justify-between text-sm">
-                  <span>{company.users.length} kullanıcı</span>
-
-                  <span>{company.orders.length} sipariş</span>
+                  <div>
+                    <p className="text-lg font-bold">
+                      {company.companyProducts.length}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      Ürün
+                    </p>
+                  </div>
                 </div>
 
-                <Button asChild className="mt-6 w-full">
-                  <Link href={`/admin/customers/${company.id}`}>
-                    Firmayı Yönet
-                  </Link>
-                </Button>
-
-                {/* <form
-                  action={async () => {
-                    "use server";
-
-                    await deleteCompanyAction(company.id);
-                  }}
-                >
-                  <Button variant="destructive" type="submit">
-                    Sil
+                <div className="mt-auto grid gap-2 pt-6 sm:grid-cols-2">
+                  <Button asChild className="h-11 rounded-2xl">
+                    <Link href={`/admin/customers/${company.id}`}>Yönet</Link>
                   </Button>
-                </form> */}
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-11 rounded-2xl"
+                  >
+                    <Link href={`/admin/customers/${company.id}/edit`}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Düzenle
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
