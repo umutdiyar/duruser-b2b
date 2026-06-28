@@ -109,9 +109,20 @@ export default async function CompanyDetailPage({
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
           <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
             <div>
-              <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
-                Firma Detayı
-              </Badge>
+              <div className="flex justify-between">
+                <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
+                  Firma Detayı
+                </Badge>
+                {company.isActive ? (
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+                    Aktif Firma
+                  </Badge>
+                ) : (
+                  <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
+                    Pasif Firma
+                  </Badge>
+                )}
+              </div>
 
               <h2 className="mt-4 text-4xl font-bold leading-tight lg:text-5xl">
                 {company.name}

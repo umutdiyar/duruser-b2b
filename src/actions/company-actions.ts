@@ -95,3 +95,28 @@ export async function updateCompanyAction(formData: FormData) {
 
   redirect("/admin/customers?toast=companyUpdated");
 }
+
+export async function toggleCompanyStatusAction(formData: FormData) {
+  const companyId = formData.get("companyId") as string;
+  const currentStatus = formData.get("currentStatus") === "true";
+
+  if (!companyId) {
+    throw new Error("Firma bulunamadı.");
+  }
+
+  await prisma.company.update({
+    where: {
+      id: companyId,
+    },
+    data: {
+      isActive: !currentStatus,
+    },
+  });
+
+  revalidatePath("/admin/customers");
+  revalidatePath(`/admin/customers/${companyId}`);
+
+  const toastKey = currentStatus ? "companyDeactivated" : "companyActivated";
+
+  redirect(`/admin/customers?toast=${toastKey}`);
+}

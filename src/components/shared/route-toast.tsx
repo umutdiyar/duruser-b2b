@@ -101,6 +101,18 @@ const toastMessages: Record<
     message: "Kullanıcı güncellendi.",
     description: "Kullanıcı bilgileri başarıyla kaydedildi.",
   },
+
+  companyActivated: {
+    type: "success",
+    message: "Firma aktife alındı.",
+    description: "Firma tekrar müşteri panelini kullanabilir.",
+  },
+
+  companyDeactivated: {
+    type: "success",
+    message: "Firma pasife alındı.",
+    description: "Firma müşteri paneli erişimi kapatıldı.",
+  },
 };
 
 export function RouteToast() {

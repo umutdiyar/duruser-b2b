@@ -39,6 +39,9 @@ export const {
           where: {
             email,
           },
+          include: {
+            company: true,
+          },
         });
 
         if (!user) {
@@ -46,6 +49,14 @@ export const {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (
+          user.role === "CUSTOMER" &&
+          user.company &&
+          !user.company.isActive
+        ) {
+          return null;
+        }
 
         if (!isPasswordValid) {
           return null;

@@ -1,6 +1,14 @@
 import Link from "next/link";
 
-import { ArrowUpRight, Building2, Pencil, Plus, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  Building2,
+  Pencil,
+  Plus,
+  Users,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
@@ -8,6 +16,8 @@ import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { RouteToast } from "@/components/shared/route-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { toggleCompanyStatusAction } from "@/actions/company-actions";
 
 export default async function CustomersPage() {
   const companies = await prisma.company.findMany({
@@ -138,14 +148,32 @@ export default async function CustomersPage() {
                     <Building2 className="h-6 w-6" />
                   </div>
 
-                  <div className="min-w-0">
-                    <h3 className="line-clamp-1 text-lg font-bold text-slate-900">
-                      {company.name}
-                    </h3>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <h3 className="line-clamp-1 text-lg font-bold text-slate-900">
+                          {company.name}
+                        </h3>
 
-                    <p className="mt-1 truncate text-sm text-muted-foreground">
-                      {company.slug}
-                    </p>
+                        <p className="mt-1 truncate text-sm text-muted-foreground">
+                          {company.slug}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0">
+                        {company.isActive ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                            Aktif
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
+                            <XCircle className="mr-1 h-3 w-3" />
+                            Pasif
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -174,7 +202,7 @@ export default async function CustomersPage() {
                   </div>
                 </div>
 
-                <div className="mt-auto grid gap-2 pt-6 sm:grid-cols-2">
+                <div className="mt-auto grid gap-2 pt-6 sm:grid-cols-3">
                   <Button asChild className="h-11 rounded-2xl">
                     <Link href={`/admin/customers/${company.id}`}>Yönet</Link>
                   </Button>
@@ -189,6 +217,23 @@ export default async function CustomersPage() {
                       Düzenle
                     </Link>
                   </Button>
+
+                  <form action={toggleCompanyStatusAction}>
+                    <input type="hidden" name="companyId" value={company.id} />
+                    <input
+                      type="hidden"
+                      name="currentStatus"
+                      value={String(company.isActive)}
+                    />
+
+                    <Button
+                      type="submit"
+                      variant={company.isActive ? "outline" : "default"}
+                      className="h-11 w-full rounded-2xl"
+                    >
+                      {company.isActive ? "Pasife Al" : "Aktife Al"}
+                    </Button>
+                  </form>
                 </div>
               </CardContent>
             </Card>
