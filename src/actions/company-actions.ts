@@ -29,14 +29,24 @@ export async function createCompanyAction(formData: FormData) {
 
   const slug = rawSlug?.trim() ? createSlug(rawSlug) : createSlug(name);
 
-  const existingCompany = await prisma.company.findUnique({
+  const existingCompany = await prisma.company.findFirst({
     where: {
-      slug,
+      OR: [
+        {
+          slug,
+        },
+        {
+          name: {
+            equals: name.trim(),
+            mode: "insensitive",
+          },
+        },
+      ],
     },
   });
 
   if (existingCompany) {
-    redirect("/admin/customers/new?toast=unexpectedError");
+    redirect("/admin/customers/new?toast=companyAlreadyExists");
   }
 
   await prisma.company.create({
@@ -68,7 +78,17 @@ export async function updateCompanyAction(formData: FormData) {
 
   const existingCompany = await prisma.company.findFirst({
     where: {
-      slug,
+      OR: [
+        {
+          slug,
+        },
+        {
+          name: {
+            equals: name.trim(),
+            mode: "insensitive",
+          },
+        },
+      ],
       NOT: {
         id: companyId,
       },
@@ -76,7 +96,7 @@ export async function updateCompanyAction(formData: FormData) {
   });
 
   if (existingCompany) {
-    redirect(`/admin/customers/${companyId}/edit?toast=unexpectedError`);
+    redirect(`/admin/customers/${companyId}/edit?toast=companyAlreadyExists`);
   }
 
   await prisma.company.update({

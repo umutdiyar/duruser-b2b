@@ -26,6 +26,19 @@ export async function createProductAction(formData: FormData) {
     throw new Error("Ürün adı zorunludur.");
   }
 
+  const existingProduct = await prisma.product.findFirst({
+    where: {
+      name: {
+        equals: name.trim(),
+        mode: "insensitive",
+      },
+    },
+  });
+
+  if (existingProduct) {
+    redirect("/admin/products/new?toast=productAlreadyExists");
+  }
+
   await prisma.product.create({
     data: {
       name: name.trim(),
@@ -55,6 +68,22 @@ export async function updateProductAction(formData: FormData) {
 
   if (!name?.trim()) {
     throw new Error("Ürün adı zorunludur.");
+  }
+
+  const existingProduct = await prisma.product.findFirst({
+    where: {
+      name: {
+        equals: name.trim(),
+        mode: "insensitive",
+      },
+      NOT: {
+        id: productId,
+      },
+    },
+  });
+
+  if (existingProduct) {
+    redirect(`/admin/products/${productId}/edit?toast=productAlreadyExists`);
   }
 
   await prisma.product.update({

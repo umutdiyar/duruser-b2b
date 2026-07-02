@@ -113,6 +113,18 @@ const toastMessages: Record<
     message: "Firma pasife alındı.",
     description: "Firma müşteri paneli erişimi kapatıldı.",
   },
+
+  productAlreadyExists: {
+    type: "error",
+    message: "Ürün zaten mevcut.",
+    description: "Aynı isimde başka bir ürün var.",
+  },
+
+  companyAlreadyExists: {
+    type: "error",
+    message: "Firma zaten mevcut.",
+    description: "Aynı isim veya kod ile kayıtlı başka bir firma var.",
+  },
 };
 
 export function RouteToast() {

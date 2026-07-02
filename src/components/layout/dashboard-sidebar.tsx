@@ -4,26 +4,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
-import {
-  History,
-  LayoutDashboard,
-  Menu,
-  Package,
-  Settings,
-  ShoppingCart,
-  Users,
-  X,
-} from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { adminNavigation, customerNavigation } from "@/constants/navigation";
 
 type DashboardSidebarProps = {
   role: "admin" | "customer";
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    companyName?: string | null;
+  };
 };
 
 function SidebarContent({
   role,
+  user,
   onNavigate,
 }: DashboardSidebarProps & {
   onNavigate?: () => void;
@@ -47,6 +44,32 @@ function SidebarContent({
 
             <p className="truncate text-xs text-slate-500 sm:text-sm">
               Sipariş Paneli
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-3xl mx-4 border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-sm font-bold text-white shadow-lg shadow-orange-500/25">
+            {role === "admin"
+              ? "D"
+              : (user?.companyName?.charAt(0)?.toUpperCase() ?? "F")}
+          </div>
+
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-slate-900">
+              {role === "admin"
+                ? "DuruSer Yönetim"
+                : (user?.companyName ?? "Firma Paneli")}
+            </p>
+
+            <p className="mt-1 truncate text-xs text-slate-500">
+              {user?.name ?? "Kullanıcı"}
+            </p>
+
+            <p className="mt-1 truncate text-[11px] text-slate-400">
+              {user?.email ?? "email bilgisi yok"}
             </p>
           </div>
         </div>
@@ -101,7 +124,7 @@ function SidebarContent({
   );
 }
 
-export function DashboardSidebar({ role }: DashboardSidebarProps) {
+export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -115,7 +138,7 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
   return (
     <>
       <aside className="fixed left-0 top-0 z-50 hidden h-screen w-[290px] border-r border-slate-200 bg-white/90 backdrop-blur-xl lg:block">
-        <SidebarContent role={role} />
+        <SidebarContent role={role} user={user} />
       </aside>
 
       <button
@@ -146,7 +169,11 @@ export function DashboardSidebar({ role }: DashboardSidebarProps) {
               <X className="h-5 w-5" />
             </button>
 
-            <SidebarContent role={role} onNavigate={() => setIsOpen(false)} />
+            <SidebarContent
+              role={role}
+              user={user}
+              onNavigate={() => setIsOpen(false)}
+            />
           </aside>
         </div>
       ) : null}

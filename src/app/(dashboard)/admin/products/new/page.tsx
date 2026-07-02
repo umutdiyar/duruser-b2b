@@ -6,6 +6,7 @@ import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { ProductForm } from "@/components/products/product-form";
 import { Button } from "@/components/ui/button";
+import { RouteToast } from "@/components/shared/route-toast";
 
 export default function NewProductPage() {
   return (
@@ -22,6 +23,8 @@ export default function NewProductPage() {
           </Button>
         }
       />
+
+      <RouteToast />
 
       <DashboardContainer>
         <ProductForm action={createProductAction} submitLabel="Ürünü Oluştur" />
