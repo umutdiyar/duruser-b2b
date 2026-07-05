@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RouteToast } from "@/components/shared/route-toast";
+import {
+  getOrderStatusClassName,
+  getOrderStatusLabel,
+} from "@/lib/order-status";
 
 function getStatusLabel(status: string) {
   const labels: Record<string, string> = {
@@ -118,8 +122,8 @@ export default async function CustomerOrdersPage({
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">
-                        {getStatusLabel(order.status)}
+                      <Badge className={getOrderStatusClassName(order.status)}>
+                        {getOrderStatusLabel(order.status)}
                       </Badge>
 
                       <p className="font-bold">

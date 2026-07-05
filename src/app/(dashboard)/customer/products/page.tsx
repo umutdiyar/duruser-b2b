@@ -138,7 +138,7 @@ export default async function CustomerProductsPage() {
                       >
                         <Link href="/customer/new-order">
                           <ShoppingCart className="mr-2 h-4 w-4" />
-                          Sipariş
+                          Sipariş Ver
                         </Link>
                       </Button>
                     </div>

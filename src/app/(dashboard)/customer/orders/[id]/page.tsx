@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Package,
   ReceiptText,
+  Trash2,
 } from "lucide-react";
 
 import { auth } from "@/auth";
@@ -21,6 +22,8 @@ import {
   getOrderStatusLabel,
 } from "@/lib/order-status";
 import { prisma } from "@/lib/prisma";
+import { OrderStatusTimeline } from "@/components/orders/order-status-timeline";
+import { cancelOrderAction } from "@/actions/order-status-actions";
 
 export default async function CustomerOrderDetailPage({
   params,
@@ -58,6 +61,9 @@ export default async function CustomerOrderDetailPage({
   if (order.companyId !== session.user.companyId) {
     redirect("/unauthorized");
   }
+
+  const canCustomerCancel =
+    order.status === "PENDING" || order.status === "CONFIRMED";
 
   return (
     <>
@@ -192,6 +198,58 @@ export default async function CustomerOrderDetailPage({
                 <div className="rounded-2xl bg-orange-50 p-4 text-sm leading-6 text-orange-800">
                   {getOrderStatusDescription(order.status)}
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Sipariş Süreci</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <OrderStatusTimeline status={order.status} />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Sipariş İşlemleri</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                {order.status === "CANCELLED" ? (
+                  <div className="rounded-2xl bg-red-50 p-4 text-sm leading-6 text-red-700">
+                    Bu sipariş iptal edilmiş.
+                  </div>
+                ) : canCustomerCancel ? (
+                  <form action={cancelOrderAction} className="space-y-4">
+                    <input type="hidden" name="orderId" value={order.id} />
+                    <input
+                      type="hidden"
+                      name="redirectTo"
+                      value={`/customer/orders/${order.id}`}
+                    />
+
+                    <div className="rounded-2xl bg-orange-50 p-4 text-sm leading-6 text-orange-800">
+                      Sipariş henüz hazırlık aşamasına geçmediği için iptal
+                      edebilirsiniz.
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      className="h-12 w-full rounded-2xl font-semibold"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Siparişi İptal Et
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="rounded-2xl border bg-white p-4 text-sm leading-6 text-muted-foreground">
+                    Sipariş hazırlık veya sevkiyat sürecine geçtiği için müşteri
+                    tarafından iptal edilemez.
+                  </div>
+                )}
               </CardContent>
             </Card>
 

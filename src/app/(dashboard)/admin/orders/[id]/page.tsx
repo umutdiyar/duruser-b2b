@@ -7,9 +7,13 @@ import {
   ClipboardList,
   Package,
   Save,
+  Trash2,
 } from "lucide-react";
 
-import { updateOrderStatusAction } from "@/actions/order-status-actions";
+import {
+  updateOrderStatusAction,
+  cancelOrderAction,
+} from "@/actions/order-status-actions";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +35,7 @@ import {
 } from "@/lib/order-status";
 import { prisma } from "@/lib/prisma";
 import { RouteToast } from "@/components/shared/route-toast";
+import { OrderStatusTimeline } from "@/components/orders/order-status-timeline";
 
 export default async function AdminOrderDetailPage({
   params,
@@ -97,7 +102,7 @@ export default async function AdminOrderDetailPage({
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
               <p className="text-sm text-slate-400">Mevcut Durum</p>
               <Badge
-                className={`mt-3 ${getOrderStatusClassName(order.status)}`}
+                className={`mt-3 px-2 py-2 ${getOrderStatusClassName(order.status)}`}
               >
                 {getOrderStatusLabel(order.status)}
               </Badge>
@@ -202,9 +207,19 @@ export default async function AdminOrderDetailPage({
                       <SelectValue placeholder="Durum seçin" />
                     </SelectTrigger>
 
-                    <SelectContent>
+                    <SelectContent
+                      position="popper"
+                      side="bottom"
+                      align="start"
+                      sideOffset={6}
+                      className="rounded-2xl border border-slate-200 bg-white p-1 shadow-xl"
+                    >
                       {orderStatuses.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
+                        <SelectItem
+                          key={status.value}
+                          value={status.value}
+                          className="rounded-xl px-3 py-2 mb-0.5"
+                        >
                           {status.label}
                         </SelectItem>
                       ))}
@@ -216,6 +231,53 @@ export default async function AdminOrderDetailPage({
                     Durumu Kaydet
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Sipariş Süreci</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <OrderStatusTimeline status={order.status} />
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Sipariş İşlemleri</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                {order.status === "CANCELLED" ? (
+                  <div className="rounded-2xl bg-red-50 p-4 text-sm leading-6 text-red-700">
+                    Bu sipariş iptal edilmiş.
+                  </div>
+                ) : (
+                  <form action={cancelOrderAction} className="space-y-4">
+                    <input type="hidden" name="orderId" value={order.id} />
+                    <input
+                      type="hidden"
+                      name="redirectTo"
+                      value={`/admin/orders/${order.id}`}
+                    />
+
+                    <div className="rounded-2xl bg-red-50 p-4 text-sm leading-6 text-red-700">
+                      Admin olarak bu siparişi operasyon durumundan bağımsız
+                      şekilde iptal edebilirsiniz.
+                    </div>
+
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      className="h-12 w-full rounded-2xl font-semibold"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Siparişi İptal Et
+                    </Button>
+                  </form>
+                )}
               </CardContent>
             </Card>
 
