@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guards";
 
 function parsePrice(value: FormDataEntryValue | null) {
   const price = Number(value);
@@ -16,6 +17,8 @@ function parsePrice(value: FormDataEntryValue | null) {
 }
 
 export async function createProductAction(formData: FormData) {
+  await requireAdmin();
+
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const price = parsePrice(formData.get("price"));
@@ -55,6 +58,8 @@ export async function createProductAction(formData: FormData) {
 }
 
 export async function updateProductAction(formData: FormData) {
+  await requireAdmin();
+
   const productId = formData.get("productId") as string;
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
@@ -106,6 +111,8 @@ export async function updateProductAction(formData: FormData) {
 }
 
 export async function toggleProductStatusAction(formData: FormData) {
+  await requireAdmin();
+
   const productId = formData.get("productId") as string;
   const currentStatus = formData.get("currentStatus") === "true";
 

@@ -4,8 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import type { OrderStatus } from "@/generated/prisma/client";
+import { requireAdmin, requireAuthenticatedUser } from "@/lib/auth-guards";
+
+const CUSTOMER_CANCELLABLE_STATUSES: OrderStatus[] = ["PENDING", "CONFIRMED"];
 
 export async function updateOrderStatusAction(formData: FormData) {
+  await requireAdmin();
+
   const orderId = formData.get("orderId") as string;
   const status = formData.get("status") as OrderStatus;
 
@@ -30,11 +35,43 @@ export async function updateOrderStatusAction(formData: FormData) {
 }
 
 export async function cancelOrderAction(formData: FormData) {
+  const session = await requireAuthenticatedUser();
+
   const orderId = formData.get("orderId") as string;
-  const redirectTo = formData.get("redirectTo") as string;
 
   if (!orderId) {
     throw new Error("Sipariş bulunamadı.");
+  }
+
+  const order = await prisma.order.findUnique({
+    where: {
+      id: orderId,
+    },
+  });
+
+  if (!order) {
+    throw new Error("Sipariş bulunamadı.");
+  }
+
+  const isAdmin = session.user.role === "ADMIN";
+  const isOwningCustomer =
+    session.user.role === "CUSTOMER" &&
+    order.companyId === session.user.companyId;
+
+  if (!isAdmin && !isOwningCustomer) {
+    redirect("/unauthorized");
+  }
+
+  const redirectTo = isAdmin
+    ? `/admin/orders/${orderId}`
+    : `/customer/orders/${orderId}`;
+
+  const isAlreadyCancelled = order.status === "CANCELLED";
+  const isCustomerBlockedByStatus =
+    !isAdmin && !CUSTOMER_CANCELLABLE_STATUSES.includes(order.status);
+
+  if (isAlreadyCancelled || isCustomerBlockedByStatus) {
+    redirect(`${redirectTo}?toast=orderCancelNotAllowed`);
   }
 
   await prisma.order.update({

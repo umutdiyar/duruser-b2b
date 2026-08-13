@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guards";
 
 function createSlug(value: string) {
   return value
@@ -20,6 +21,8 @@ function createSlug(value: string) {
 }
 
 export async function createCompanyAction(formData: FormData) {
+  await requireAdmin();
+
   const name = formData.get("name") as string;
   const rawSlug = formData.get("slug") as string;
 
@@ -62,6 +65,8 @@ export async function createCompanyAction(formData: FormData) {
 }
 
 export async function updateCompanyAction(formData: FormData) {
+  await requireAdmin();
+
   const companyId = formData.get("companyId") as string;
   const name = formData.get("name") as string;
   const rawSlug = formData.get("slug") as string;
@@ -117,6 +122,8 @@ export async function updateCompanyAction(formData: FormData) {
 }
 
 export async function toggleCompanyStatusAction(formData: FormData) {
+  await requireAdmin();
+
   const companyId = formData.get("companyId") as string;
   const currentStatus = formData.get("currentStatus") === "true";
 
