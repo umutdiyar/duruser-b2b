@@ -5,8 +5,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guards";
 
 export async function createCompanyUserAction(formData: FormData) {
+  await requireAdmin();
+
   const companyId = formData.get("companyId") as string;
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
@@ -56,6 +59,8 @@ export async function createCompanyUserAction(formData: FormData) {
 }
 
 export async function updateCompanyUserAction(formData: FormData) {
+  await requireAdmin();
+
   const userId = formData.get("userId") as string;
   const companyId = formData.get("companyId") as string;
   const name = formData.get("name") as string;

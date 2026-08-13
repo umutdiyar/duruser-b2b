@@ -1,8 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { auth } from "../auth";
 import { prisma } from "@/lib/prisma";
+import { requireCustomer } from "@/lib/auth-guards";
 
 function generateOrderNumber() {
   const random = Math.floor(1000 + Math.random() * 9000);
@@ -10,13 +10,7 @@ function generateOrderNumber() {
 }
 
 export async function createOrderAction(formData: FormData) {
-  const session = await auth();
-
-  if (!session?.user?.companyId) {
-    throw new Error("Firma bilgisi bulunamadı.");
-  }
-
-  const companyId = session.user.companyId;
+  const { companyId } = await requireCustomer();
 
   const productIds = formData.getAll("productId") as string[];
 
@@ -41,6 +35,9 @@ export async function createOrderAction(formData: FormData) {
       productId: {
         in: items.map((item) => item.productId),
       },
+      product: {
+        isActive: true,
+      },
     },
     include: {
       product: true,
@@ -48,7 +45,7 @@ export async function createOrderAction(formData: FormData) {
   });
 
   if (allowedProducts.length !== items.length) {
-    throw new Error("Yetkisiz ürün seçimi yapıldı.");
+    throw new Error("Yetkisiz veya artık aktif olmayan ürün seçimi yapıldı.");
   }
 
   const orderItems = items.map((item) => {

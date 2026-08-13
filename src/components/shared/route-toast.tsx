@@ -125,6 +125,13 @@ const toastMessages: Record<
     message: "Firma zaten mevcut.",
     description: "Aynı isim veya kod ile kayıtlı başka bir firma var.",
   },
+
+  orderCancelNotAllowed: {
+    type: "error",
+    message: "Sipariş iptal edilemedi.",
+    description:
+      "Bu sipariş artık iptal edilebilecek durumda değil veya zaten iptal edilmiş.",
+  },
 };
 
 export function RouteToast() {

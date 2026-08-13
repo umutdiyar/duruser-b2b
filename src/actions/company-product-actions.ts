@@ -3,8 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth-guards";
 
 export async function updateCompanyProducts(formData: FormData) {
+  await requireAdmin();
+
   const companyId = formData.get("companyId") as string;
   const productIds = formData.getAll("productIds") as string[];
 
