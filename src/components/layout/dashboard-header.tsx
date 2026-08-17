@@ -2,6 +2,7 @@ import { Bell, LogOut, Search } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth-actions";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/shared/submit-button";
 
 type DashboardHeaderProps = {
   title: string;
@@ -53,15 +54,15 @@ export function DashboardHeader({
           </Button>
 
           <form action={logoutAction}>
-            <Button
-              type="submit"
+            <SubmitButton
+              pendingText="Çıkış yapılıyor..."
               variant="outline"
               aria-label="Çıkış yap"
               className="h-11 rounded-2xl border-slate-200 bg-white px-3 lg:px-4"
             >
               <LogOut className="h-4 w-4 lg:mr-2" />
               <span className="hidden lg:inline">Çıkış Yap</span>
-            </Button>
+            </SubmitButton>
           </form>
         </div>
       </div>

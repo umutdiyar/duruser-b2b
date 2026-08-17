@@ -1,27 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  CheckCircle2,
-  Pencil,
-  Package,
-  Plus,
-  Search,
-  XCircle,
-} from "lucide-react";
+import { Package, Pencil, Plus, Search } from "lucide-react";
 
 import { toggleProductStatusAction } from "@/actions/product-actions";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { RouteToast } from "@/components/shared/route-toast";
+import { ActiveBadge } from "@/components/shared/active-badge";
+import { EmptyState } from "@/components/shared/empty-state";
+import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { formatCurrency } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      imageUrl: true,
+      isActive: true,
+    },
     orderBy: {
       name: "asc",
     },
@@ -101,7 +106,7 @@ export default async function ProductsPage() {
                 </div>
 
                 <div className="rounded-2xl bg-green-100 p-3 text-green-600">
-                  <CheckCircle2 className="h-5 w-5" />
+                  <Package className="h-5 w-5" />
                 </div>
               </div>
             </CardContent>
@@ -118,7 +123,7 @@ export default async function ProductsPage() {
                 </div>
 
                 <div className="rounded-2xl bg-red-100 p-3 text-red-600">
-                  <XCircle className="h-5 w-5" />
+                  <Package className="h-5 w-5" />
                 </div>
               </div>
             </CardContent>
@@ -138,112 +143,112 @@ export default async function ProductsPage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {products.map((product) => (
-            <Card
-              key={product.id}
-              className="group overflow-hidden border-0 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              <div className="relative h-48 overflow-hidden bg-slate-100">
-                {product.imageUrl ? (
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                    <Package className="h-14 w-14 text-slate-300" />
-                  </div>
-                )}
-
-                <div className="absolute left-3 top-3">
-                  <Badge className="border-0 bg-white/90 text-slate-700 shadow-sm backdrop-blur hover:bg-white/90">
-                    #{product.id.slice(-6)}
-                  </Badge>
-                </div>
-
-                <div className="absolute right-3 top-3">
-                  {product.isActive ? (
-                    <Badge className="border-0 bg-emerald-500 text-white shadow-sm hover:bg-emerald-500">
-                      <CheckCircle2 className="mr-1 h-3 w-3" />
-                      Aktif
-                    </Badge>
-                  ) : (
-                    <Badge className="border-0 bg-red-500 text-white shadow-sm hover:bg-red-500">
-                      <XCircle className="mr-1 h-3 w-3" />
-                      Pasif
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <CardContent className="flex min-h-[260px] flex-col p-5">
-                <div className="min-w-0">
-                  <h3 className="line-clamp-1 text-lg font-bold text-slate-900">
-                    {product.name}
-                  </h3>
-
-                  <p className="mt-3 line-clamp-2 min-h-[40px] text-sm leading-5 text-muted-foreground">
-                    {product.description || "Bu ürün için açıklama eklenmemiş."}
-                  </p>
-                </div>
-
-                <div className="mt-5 rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs font-medium text-muted-foreground">
-                    Güncel Fiyat
-                  </p>
-
-                  <p className="mt-1 text-2xl font-bold text-slate-900">
-                    ₺{product.price.toLocaleString("tr-TR")}
-                  </p>
-                </div>
-
-                <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
-                  <form action={toggleProductStatusAction}>
-                    <input type="hidden" name="productId" value={product.id} />
-                    <input
-                      type="hidden"
-                      name="currentStatus"
-                      value={String(product.isActive)}
+        {products.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="Henüz ürün eklenmedi"
+            description="İlk ürününüzü ekleyerek kataloğu oluşturmaya başlayın."
+            action={
+              <Button
+                asChild
+                className="rounded-2xl bg-orange-500 hover:bg-orange-600"
+              >
+                <Link href="/admin/products/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Yeni Ürün Ekle
+                </Link>
+              </Button>
+            }
+          />
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {products.map((product, index) => (
+              <Card
+                key={product.id}
+                className="group overflow-hidden border-0 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="relative h-48 overflow-hidden bg-slate-100">
+                  {product.imageUrl ? (
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.name}
+                      fill
+                      priority={index === 0}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                      className="object-cover transition duration-300 group-hover:scale-105"
                     />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                      <Package className="h-14 w-14 text-slate-300" />
+                    </div>
+                  )}
+
+                  <div className="absolute left-3 top-3">
+                    <Badge className="border-0 bg-white/90 text-slate-700 shadow-sm backdrop-blur hover:bg-white/90">
+                      #{product.id.slice(-6)}
+                    </Badge>
+                  </div>
+
+                  <div className="absolute right-3 top-3">
+                    <ActiveBadge active={product.isActive} className="shadow-sm" />
+                  </div>
+                </div>
+
+                <CardContent className="flex min-h-[260px] flex-col p-5">
+                  <div className="min-w-0">
+                    <h3 className="line-clamp-1 text-lg font-bold text-slate-900">
+                      {product.name}
+                    </h3>
+
+                    <p className="mt-3 line-clamp-2 min-h-[40px] text-sm leading-5 text-muted-foreground">
+                      {product.description || "Bu ürün için açıklama eklenmemiş."}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 rounded-2xl bg-slate-50 p-4">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Güncel Fiyat
+                    </p>
+
+                    <p className="mt-1 text-2xl font-bold text-slate-900">
+                      {formatCurrency(product.price)}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
+                    <form action={toggleProductStatusAction}>
+                      <input type="hidden" name="productId" value={product.id} />
+                      <input
+                        type="hidden"
+                        name="currentStatus"
+                        value={String(product.isActive)}
+                      />
+
+                      <SubmitButton
+                        pendingText="..."
+                        variant={product.isActive ? "outline" : "default"}
+                        className="h-11 w-full rounded-2xl"
+                      >
+                        {product.isActive ? "Pasife Al" : "Aktife Al"}
+                      </SubmitButton>
+                    </form>
 
                     <Button
-                      type="submit"
-                      variant={product.isActive ? "outline" : "default"}
-                      className="h-11 w-full rounded-2xl"
+                      asChild
+                      variant="outline"
+                      className="h-11 rounded-2xl"
                     >
-                      {product.isActive ? (
-                        <>
-                          <XCircle className="mr-2 h-4 w-4" />
-                          Pasife Al
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 className="mr-2 h-4 w-4" />
-                          Aktife Al
-                        </>
-                      )}
+                      <Link href={`/admin/products/${product.id}/edit`}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Düzenle
+                      </Link>
                     </Button>
-                  </form>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="h-11 rounded-2xl"
-                  >
-                    <Link href={`/admin/products/${product.id}/edit`}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Düzenle
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </DashboardContainer>
     </>
   );

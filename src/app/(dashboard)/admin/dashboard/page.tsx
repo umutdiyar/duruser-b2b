@@ -9,24 +9,55 @@ import {
 } from "lucide-react";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { OrdersChart } from "@/components/dashboard/orders-chart";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
-import {
-  getOrderStatusClassName,
-  getOrderStatusLabel,
-} from "@/lib/order-status";
+
+const WEEKDAY_LABELS = ["Pzt", "Sal", "Çrş", "Prş", "Cum", "Cts", "Paz"];
+
+function getCurrentWeekRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isoDay = start.getDay() === 0 ? 7 : start.getDay(); // 1 = Mon ... 7 = Sun
+  start.setDate(start.getDate() - (isoDay - 1));
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7);
+
+  return { start, end };
+}
 
 export default async function AdminDashboardPage() {
-  const [orders, companies, products] = await Promise.all([
+  const { start: weekStart, end: weekEnd } = getCurrentWeekRange();
+
+  const [
+    recentOrders,
+    companies,
+    products,
+    totalOrders,
+    pendingOrders,
+    shippedOrders,
+    deliveredOrders,
+    weeklyOrders,
+  ] = await Promise.all([
     prisma.order.findMany({
-      include: {
-        company: true,
+      select: {
+        id: true,
+        orderNumber: true,
+        status: true,
+        totalPrice: true,
+        company: {
+          select: {
+            name: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -35,26 +66,34 @@ export default async function AdminDashboardPage() {
     }),
     prisma.company.count(),
     prisma.product.count(),
+    prisma.order.count(),
+    prisma.order.count({ where: { status: "PENDING" } }),
+    prisma.order.count({ where: { status: "SHIPPED" } }),
+    prisma.order.count({ where: { status: "DELIVERED" } }),
+    prisma.order.findMany({
+      where: {
+        createdAt: {
+          gte: weekStart,
+          lt: weekEnd,
+        },
+      },
+      select: {
+        createdAt: true,
+      },
+    }),
   ]);
 
-  const totalOrders = await prisma.order.count();
+  const weeklyChartData = WEEKDAY_LABELS.map((label, index) => {
+    const dayStart = new Date(weekStart);
+    dayStart.setDate(weekStart.getDate() + index);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayStart.getDate() + 1);
 
-  const pendingOrders = await prisma.order.count({
-    where: {
-      status: "PENDING",
-    },
-  });
+    const count = weeklyOrders.filter(
+      (order) => order.createdAt >= dayStart && order.createdAt < dayEnd,
+    ).length;
 
-  const shippedOrders = await prisma.order.count({
-    where: {
-      status: "SHIPPED",
-    },
-  });
-
-  const deliveredOrders = await prisma.order.count({
-    where: {
-      status: "DELIVERED",
-    },
+    return { day: label, orders: count };
   });
 
   const stats = [
@@ -102,8 +141,6 @@ export default async function AdminDashboardPage() {
         }
       />
       <DashboardContainer>
-        {/* HERO */}
-
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 to-orange-600 via-orange-500 text-white shadow-2xl">
           <CardContent className="flex flex-col gap-8 p-6 lg:p-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
@@ -144,7 +181,7 @@ export default async function AdminDashboardPage() {
             return (
               <Card
                 key={stat.title}
-                className="border-0 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                className="border-0 shadow-sm transition-shadow duration-200 hover:shadow-lg"
               >
                 <CardContent className="p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-4">
@@ -177,12 +214,12 @@ export default async function AdminDashboardPage() {
         <div className="grid gap-6 xl:grid-cols-3 ">
           <Card className="border-0 min-w-0 shadow-sm xl:col-span-2">
             <CardHeader>
-              <CardTitle>Haftalık Sipariş Analizi</CardTitle>
+              <CardTitle>Bu Haftaki Sipariş Analizi</CardTitle>
             </CardHeader>
 
             <CardContent>
               <div className="min-w-0 h-[260px] sm:h-[320px]">
-                <OrdersChart />
+                <OrdersChart data={weeklyChartData} />
               </div>
             </CardContent>
           </Card>
@@ -217,7 +254,7 @@ export default async function AdminDashboardPage() {
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Son Siparişler</CardTitle>
 
-            <Button variant="outline" className="rounded-2xl">
+            <Button asChild variant="outline" className="rounded-2xl">
               <Link href="/admin/orders">
                 Tümünü Gör
                 <ArrowUpRight className="ml-2 h-4 w-4" />
@@ -226,12 +263,14 @@ export default async function AdminDashboardPage() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {orders.length === 0 ? (
-              <div className="rounded-3xl border bg-white p-8 text-center text-sm text-muted-foreground">
-                Henüz sipariş bulunmuyor.
-              </div>
+            {recentOrders.length === 0 ? (
+              <EmptyState
+                icon={ShoppingCart}
+                title="Henüz sipariş bulunmuyor"
+                description="Müşterileriniz sipariş oluşturduğunda burada listelenecek."
+              />
             ) : (
-              orders.map((order) => (
+              recentOrders.map((order) => (
                 <div
                   key={order.id}
                   className="flex min-w-0 flex-col gap-4 rounded-3xl border bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
@@ -246,9 +285,7 @@ export default async function AdminDashboardPage() {
                   </div>
 
                   <div className="flex shrink-0 flex-wrap items-center gap-3">
-                    <Badge className={getOrderStatusClassName(order.status)}>
-                      {getOrderStatusLabel(order.status)}
-                    </Badge>
+                    <OrderStatusBadge status={order.status} />
 
                     <p className="font-bold">
                       {formatCurrency(order.totalPrice)}

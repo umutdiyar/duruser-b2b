@@ -6,27 +6,12 @@ import { prisma } from "@/lib/prisma";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RouteToast } from "@/components/shared/route-toast";
-import {
-  getOrderStatusClassName,
-  getOrderStatusLabel,
-} from "@/lib/order-status";
-
-function getStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    PENDING: "Yeni Sipariş",
-    CONFIRMED: "Onaylandı",
-    PREPARING: "Hazırlanıyor",
-    SHIPPED: "Sevkiyatta",
-    DELIVERED: "Teslim Edildi",
-    CANCELLED: "İptal",
-  };
-
-  return labels[status] ?? status;
-}
+import { formatCurrency, formatDate } from "@/lib/format";
 
 export default async function CustomerOrdersPage({
   searchParams,
@@ -46,10 +31,21 @@ export default async function CustomerOrdersPage({
         where: {
           companyId,
         },
-        include: {
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          totalPrice: true,
+          createdAt: true,
           items: {
-            include: {
-              product: true,
+            select: {
+              id: true,
+              quantity: true,
+              product: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
         },
@@ -70,7 +66,7 @@ export default async function CustomerOrdersPage({
 
       <DashboardContainer>
         {created ? (
-          <Card className="border-0 bg-green-50 shadow-sm">
+          <Card className="animate-in fade-in slide-in-from-top-2 border-0 bg-green-50 shadow-sm duration-300">
             <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-green-800">
@@ -103,13 +99,22 @@ export default async function CustomerOrdersPage({
 
           <CardContent className="space-y-4">
             {orders.length === 0 ? (
-              <div className="rounded-3xl border bg-white p-8 text-center">
-                <PackageCheck className="mx-auto h-10 w-10 text-orange-500" />
-                <h3 className="mt-4 text-xl font-bold">Henüz sipariş yok</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  İlk siparişinizi oluşturarak süreci başlatabilirsiniz.
-                </p>
-              </div>
+              <EmptyState
+                icon={PackageCheck}
+                title="Henüz sipariş yok"
+                description="İlk siparişinizi oluşturarak süreci başlatabilirsiniz."
+                action={
+                  <Button
+                    asChild
+                    className="rounded-2xl bg-orange-500 hover:bg-orange-600"
+                  >
+                    <Link href="/customer/new-order">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Yeni Sipariş Oluştur
+                    </Link>
+                  </Button>
+                }
+              />
             ) : (
               orders.map((order) => (
                 <div key={order.id} className="rounded-3xl border bg-white p-5">
@@ -117,17 +122,15 @@ export default async function CustomerOrdersPage({
                     <div>
                       <p className="font-bold">{order.orderNumber}</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {order.createdAt.toLocaleDateString("tr-TR")}
+                        {formatDate(order.createdAt)}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <Badge className={getOrderStatusClassName(order.status)}>
-                        {getOrderStatusLabel(order.status)}
-                      </Badge>
+                      <OrderStatusBadge status={order.status} />
 
                       <p className="font-bold">
-                        ₺{order.totalPrice.toLocaleString("tr-TR")}
+                        {formatCurrency(order.totalPrice)}
                       </p>
                     </div>
                   </div>

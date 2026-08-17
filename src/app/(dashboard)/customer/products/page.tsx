@@ -7,9 +7,11 @@ import { prisma } from "@/lib/prisma";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/format";
 
 export default async function CustomerProductsPage() {
   const session = await auth();
@@ -24,8 +26,17 @@ export default async function CustomerProductsPage() {
             isActive: true,
           },
         },
-        include: {
-          product: true,
+        select: {
+          customPrice: true,
+          product: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              imageUrl: true,
+              price: true,
+            },
+          },
         },
         orderBy: {
           product: {
@@ -72,27 +83,20 @@ export default async function CustomerProductsPage() {
         </Card>
 
         {products.length === 0 ? (
-          <Card className="border-0 shadow-sm">
-            <CardContent className="flex flex-col items-center justify-center p-10 text-center">
-              <Package className="h-12 w-12 text-orange-500" />
-              <h3 className="mt-4 text-xl font-bold">
-                Tanımlı ürün bulunmuyor
-              </h3>
-              <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Bu firmaya henüz ürün yetkisi verilmemiş. Admin panelinden ürün
-                yetkilendirmesi yapılmalı.
-              </p>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={Package}
+            title="Tanımlı ürün bulunmuyor"
+            description="Bu firmaya henüz ürün yetkisi verilmemiş. Admin panelinden ürün yetkilendirmesi yapılmalı."
+          />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-            {products.map(({ product, customPrice }) => {
+            {products.map(({ product, customPrice }, index) => {
               const price = customPrice ?? product.price;
 
               return (
                 <Card
                   key={product.id}
-                  className="overflow-hidden border-0 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                  className="group overflow-hidden border-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                 >
                   <div className="relative h-48 bg-slate-100">
                     {product.imageUrl ? (
@@ -100,7 +104,9 @@ export default async function CustomerProductsPage() {
                         src={product.imageUrl}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        priority={index === 0}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                        className="object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">
@@ -108,33 +114,35 @@ export default async function CustomerProductsPage() {
                       </div>
                     )}
 
-                    <Badge className="absolute right-3 top-3 bg-green-500 text-white hover:bg-green-500">
+                    <Badge className="absolute right-3 top-3 border-0 bg-green-500 text-white hover:bg-green-500">
                       Aktif
                     </Badge>
                   </div>
 
                   <CardContent className="p-5">
-                    <h3 className="text-lg font-bold">{product.name}</h3>
+                    <h3 className="line-clamp-1 text-lg font-bold">
+                      {product.name}
+                    </h3>
 
                     <p className="mt-2 line-clamp-2 min-h-[40px] text-sm text-muted-foreground">
                       {product.description ||
                         "Ürün açıklaması yakında eklenecek."}
                     </p>
 
-                    <div className="mt-6 flex items-center justify-between">
-                      <div>
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">
                           Birim Fiyat
                         </p>
-                        <p className="text-2xl font-bold">
-                          ₺{price.toLocaleString("tr-TR")}
+                        <p className="truncate text-2xl font-bold">
+                          {formatCurrency(price)}
                         </p>
                       </div>
 
                       <Button
                         asChild
                         size="sm"
-                        className="rounded-xl bg-orange-500 hover:bg-orange-600"
+                        className="shrink-0 rounded-xl bg-orange-500 hover:bg-orange-600"
                       >
                         <Link href="/customer/new-order">
                           <ShoppingCart className="mr-2 h-4 w-4" />

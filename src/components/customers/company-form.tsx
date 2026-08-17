@@ -1,6 +1,6 @@
 import type { Company } from "@/generated/prisma/client";
 
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,9 +59,12 @@ export function CompanyForm({
             kullanıcı tanımlaması yapılabilir.
           </div>
 
-          <Button className="h-12 rounded-2xl bg-orange-500 px-6 font-semibold hover:bg-orange-600">
+          <SubmitButton
+            pendingText="Kaydediliyor..."
+            className="h-12 rounded-2xl bg-orange-500 px-6 font-semibold hover:bg-orange-600"
+          >
             {submitLabel}
-          </Button>
+          </SubmitButton>
         </form>
       </CardContent>
     </Card>

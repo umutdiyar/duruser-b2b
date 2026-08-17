@@ -16,11 +16,16 @@ import { updateCompanyProducts } from "@/actions/company-product-actions";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
+import { ActiveBadge } from "@/components/shared/active-badge";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
+import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RouteToast } from "@/components/shared/route-toast";
+import { formatCurrency } from "@/lib/format";
 
 export default async function CompanyDetailPage({
   params,
@@ -31,31 +36,56 @@ export default async function CompanyDetailPage({
 }) {
   const { id } = await params;
 
-  const company = await prisma.company.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      users: true,
-      orders: {
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: 5,
+  const [company, products] = await Promise.all([
+    prisma.company.findUnique({
+      where: {
+        id,
       },
-      companyProducts: {
-        include: {
-          product: true,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        isActive: true,
+        users: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        orders: {
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            totalPrice: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: 5,
+        },
+        companyProducts: {
+          select: {
+            productId: true,
+          },
         },
       },
-    },
-  });
-
-  const products = await prisma.product.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
+    }),
+    prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        isActive: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+  ]);
 
   if (!company) {
     return (
@@ -99,13 +129,13 @@ export default async function CompanyDetailPage({
       <RouteToast />
 
       <DashboardContainer>
-        {" "}
         <Button asChild variant="outline" className="rounded-2xl">
           <Link href="/admin/customers">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Firmalara Dön
           </Link>
         </Button>
+
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
           <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
             <div>
@@ -113,15 +143,12 @@ export default async function CompanyDetailPage({
                 <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
                   Firma Detayı
                 </Badge>
-                {company.isActive ? (
-                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-                    Aktif Firma
-                  </Badge>
-                ) : (
-                  <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
-                    Pasif Firma
-                  </Badge>
-                )}
+
+                <ActiveBadge
+                  active={company.isActive}
+                  activeLabel="Aktif Firma"
+                  inactiveLabel="Pasif Firma"
+                />
               </div>
 
               <h2 className="mt-4 text-4xl font-bold leading-tight lg:text-5xl">
@@ -140,12 +167,15 @@ export default async function CompanyDetailPage({
             </div>
           </CardContent>
         </Card>
+
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <Building2 className="h-6 w-6 text-orange-500" />
               <p className="mt-4 text-sm text-muted-foreground">Firma</p>
-              <p className="mt-2 text-3xl font-bold">Aktif</p>
+              <p className="mt-2 text-3xl font-bold">
+                {company.isActive ? "Aktif" : "Pasif"}
+              </p>
             </CardContent>
           </Card>
 
@@ -167,6 +197,7 @@ export default async function CompanyDetailPage({
             </CardContent>
           </Card>
         </div>
+
         <div className="grid gap-6 xl:grid-cols-3">
           <Card className="border-0 shadow-sm xl:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -188,7 +219,7 @@ export default async function CompanyDetailPage({
                     return (
                       <label
                         key={product.id}
-                        className="flex cursor-pointer items-start gap-4 rounded-3xl border bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg"
+                        className="flex cursor-pointer items-start gap-4 rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-lg"
                       >
                         <Checkbox
                           name="productIds"
@@ -202,7 +233,7 @@ export default async function CompanyDetailPage({
                             <div>
                               <p className="font-semibold">{product.name}</p>
                               <p className="mt-1 text-sm text-muted-foreground">
-                                ₺{product.price.toLocaleString("tr-TR")}
+                                {formatCurrency(product.price)}
                               </p>
                             </div>
 
@@ -223,10 +254,13 @@ export default async function CompanyDetailPage({
                   })}
                 </div>
 
-                <Button className="h-12 rounded-2xl bg-orange-500 px-6 font-semibold hover:bg-orange-600">
+                <SubmitButton
+                  pendingText="Kaydediliyor..."
+                  className="h-12 rounded-2xl bg-orange-500 px-6 font-semibold hover:bg-orange-600"
+                >
                   <Save className="mr-2 h-4 w-4" />
                   Ürün Yetkilerini Kaydet
-                </Button>
+                </SubmitButton>
               </form>
             </CardContent>
           </Card>
@@ -283,9 +317,11 @@ export default async function CompanyDetailPage({
                     </div>
                   ))
                 ) : (
-                  <div className="rounded-2xl border bg-white p-5 text-sm text-muted-foreground">
-                    Bu firmaya bağlı kullanıcı yok.
-                  </div>
+                  <EmptyState
+                    icon={User}
+                    title="Kullanıcı yok"
+                    description="Bu firmaya bağlı kullanıcı bulunmuyor."
+                  />
                 )}
               </CardContent>
             </Card>
@@ -300,23 +336,26 @@ export default async function CompanyDetailPage({
                   company.orders.map((order) => (
                     <div
                       key={order.id}
-                      className="flex items-center justify-between rounded-2xl border bg-white p-4"
+                      className="flex items-center justify-between gap-3 rounded-2xl border bg-white p-4"
                     >
-                      <div>
-                        <p className="font-semibold">{order.orderNumber}</p>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">
+                          {order.orderNumber}
+                        </p>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          ₺{order.totalPrice.toLocaleString("tr-TR")}
+                          {formatCurrency(order.totalPrice)}
                         </p>
                       </div>
 
-                      <Badge variant="secondary">{order.status}</Badge>
+                      <OrderStatusBadge status={order.status} />
                     </div>
                   ))
                 ) : (
-                  <div className="rounded-2xl border bg-white p-5 text-sm text-muted-foreground">
-                    <ShoppingCart className="mb-3 h-5 w-5 text-orange-500" />
-                    Bu firmaya ait sipariş bulunmuyor.
-                  </div>
+                  <EmptyState
+                    icon={ShoppingCart}
+                    title="Sipariş yok"
+                    description="Bu firmaya ait sipariş bulunmuyor."
+                  />
                 )}
               </CardContent>
             </Card>

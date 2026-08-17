@@ -31,6 +31,12 @@ export default async function EditCompanyUserPage({
       id: userId,
       companyId: id,
     },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+    },
   });
 
   if (!company || !user) {

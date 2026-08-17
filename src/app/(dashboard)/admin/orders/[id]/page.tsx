@@ -16,6 +16,8 @@ import {
 } from "@/actions/order-status-actions";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
+import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,12 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency, formatDateTime } from "@/lib/format";
-import {
-  getOrderStatusClassName,
-  getOrderStatusDescription,
-  getOrderStatusLabel,
-  orderStatuses,
-} from "@/lib/order-status";
+import { getOrderStatusDescription, orderStatuses } from "@/lib/order-status";
 import { prisma } from "@/lib/prisma";
 import { RouteToast } from "@/components/shared/route-toast";
 import { OrderStatusTimeline } from "@/components/orders/order-status-timeline";
@@ -50,11 +47,29 @@ export default async function AdminOrderDetailPage({
     where: {
       id,
     },
-    include: {
-      company: true,
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      totalPrice: true,
+      notes: true,
+      createdAt: true,
+      company: {
+        select: {
+          name: true,
+        },
+      },
       items: {
-        include: {
-          product: true,
+        select: {
+          id: true,
+          quantity: true,
+          unitPrice: true,
+          totalPrice: true,
+          product: {
+            select: {
+              name: true,
+            },
+          },
         },
       },
     },
@@ -101,11 +116,9 @@ export default async function AdminOrderDetailPage({
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
               <p className="text-sm text-slate-400">Mevcut Durum</p>
-              <Badge
-                className={`mt-3 px-2 py-2 ${getOrderStatusClassName(order.status)}`}
-              >
-                {getOrderStatusLabel(order.status)}
-              </Badge>
+              <div className="mt-3">
+                <OrderStatusBadge status={order.status} className="px-2 py-2" />
+              </div>
               <p className="mt-3 max-w-xs text-xs leading-5 text-slate-400">
                 {getOrderStatusDescription(order.status)}
               </p>
@@ -226,10 +239,13 @@ export default async function AdminOrderDetailPage({
                     </SelectContent>
                   </Select>
 
-                  <Button className="h-12 w-full rounded-2xl bg-orange-500 font-semibold hover:bg-orange-600">
+                  <SubmitButton
+                    pendingText="Kaydediliyor..."
+                    className="h-12 w-full rounded-2xl bg-orange-500 font-semibold hover:bg-orange-600"
+                  >
                     <Save className="mr-2 h-4 w-4" />
                     Durumu Kaydet
-                  </Button>
+                  </SubmitButton>
                 </form>
               </CardContent>
             </Card>
@@ -257,25 +273,20 @@ export default async function AdminOrderDetailPage({
                 ) : (
                   <form action={cancelOrderAction} className="space-y-4">
                     <input type="hidden" name="orderId" value={order.id} />
-                    <input
-                      type="hidden"
-                      name="redirectTo"
-                      value={`/admin/orders/${order.id}`}
-                    />
 
                     <div className="rounded-2xl bg-red-50 p-4 text-sm leading-6 text-red-700">
                       Admin olarak bu siparişi operasyon durumundan bağımsız
                       şekilde iptal edebilirsiniz.
                     </div>
 
-                    <Button
-                      type="submit"
+                    <SubmitButton
+                      pendingText="İptal ediliyor..."
                       variant="destructive"
                       className="h-12 w-full rounded-2xl font-semibold"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Siparişi İptal Et
-                    </Button>
+                    </SubmitButton>
                   </form>
                 )}
               </CardContent>

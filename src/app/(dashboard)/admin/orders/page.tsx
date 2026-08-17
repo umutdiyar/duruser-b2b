@@ -3,23 +3,36 @@ import { ArrowUpRight, PackageCheck, ShoppingCart } from "lucide-react";
 
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/format";
-import {
-  getOrderStatusClassName,
-  getOrderStatusLabel,
-} from "@/lib/order-status";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
-    include: {
-      company: true,
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      totalPrice: true,
+      notes: true,
+      createdAt: true,
+      company: {
+        select: {
+          name: true,
+        },
+      },
       items: {
-        include: {
-          product: true,
+        select: {
+          id: true,
+          quantity: true,
+          product: {
+            select: {
+              name: true,
+            },
+          },
         },
       },
     },
@@ -80,14 +93,16 @@ export default async function AdminOrdersPage() {
 
           <CardContent className="space-y-4">
             {orders.length === 0 ? (
-              <div className="rounded-3xl border bg-white p-8 text-center text-sm text-muted-foreground">
-                Henüz sipariş bulunmuyor.
-              </div>
+              <EmptyState
+                icon={ShoppingCart}
+                title="Henüz sipariş bulunmuyor"
+                description="Müşterileriniz sipariş oluşturduğunda burada listelenecek."
+              />
             ) : (
               orders.map((order) => (
                 <div
                   key={order.id}
-                  className="rounded-3xl border bg-white p-5 transition hover:shadow-md"
+                  className="rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-md"
                 >
                   <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
@@ -98,9 +113,7 @@ export default async function AdminOrdersPage() {
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center gap-3">
-                      <Badge className={getOrderStatusClassName(order.status)}>
-                        {getOrderStatusLabel(order.status)}
-                      </Badge>
+                      <OrderStatusBadge status={order.status} />
 
                       <p className="font-bold">
                         {formatCurrency(order.totalPrice)}

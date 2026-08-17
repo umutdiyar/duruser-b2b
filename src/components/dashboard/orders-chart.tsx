@@ -8,42 +8,18 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
-import { CardContent } from "../ui/card";
 
-const data = [
-  {
-    day: "Pzt",
-    orders: 12,
-  },
-  {
-    day: "Sal",
-    orders: 19,
-  },
-  {
-    day: "Çrş",
-    orders: 15,
-  },
-  {
-    day: "Prş",
-    orders: 24,
-  },
-  {
-    day: "Cum",
-    orders: 31,
-  },
-  {
-    day: "Cts",
-    orders: 18,
-  },
-  {
-    day: "Paz",
-    orders: 22,
-  },
-];
+type OrdersChartProps = {
+  data: { day: string; orders: number }[];
+};
 
-export function OrdersChart() {
+export function OrdersChart({ data }: OrdersChartProps) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+      initialDimension={{ width: 700, height: 300 }}
+    >
       <AreaChart data={data}>
         <defs>
           <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
@@ -55,7 +31,7 @@ export function OrdersChart() {
 
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
 
-        <XAxis dataKey="day" tickLine={false} axisLine={false} />
+        <XAxis dataKey="day" tickLine={false} axisLine={false} interval={0} />
 
         <Tooltip />
 

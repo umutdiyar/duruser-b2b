@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { EmptyState } from "@/components/shared/empty-state";
+import { SubmitButton } from "@/components/shared/submit-button";
 
 type OrderProduct = {
   id: string;
@@ -100,11 +102,13 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
 
             <CardContent className="space-y-4">
               {filteredProducts.length === 0 ? (
-                <div className="rounded-3xl border bg-white p-8 text-center text-sm text-muted-foreground">
-                  Aramanıza uygun ürün bulunamadı.
-                </div>
+                <EmptyState
+                  icon={Search}
+                  title="Ürün bulunamadı"
+                  description="Aramanıza uygun ürün bulunamadı. Farklı bir anahtar kelime deneyin."
+                />
               ) : (
-                filteredProducts.map(({ product, customPrice }) => {
+                filteredProducts.map(({ product, customPrice }, index) => {
                   const price = customPrice ?? product.price;
                   const quantity = quantities[product.id] ?? 0;
 
@@ -126,6 +130,7 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
                               src={product.imageUrl}
                               alt={product.name}
                               fill
+                              priority={index === 0}
                               sizes="96px"
                               className="object-cover"
                             />
@@ -159,13 +164,14 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
                           </div>
 
                           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex w-full items-center justify-between rounded-2xl bg-slate-50 p-2 sm:w-[180px]">
+                            <div className="flex w-full items-center justify-between rounded-2xl bg-slate-50 p-2 sm:w-[188px]">
                               <button
                                 type="button"
+                                aria-label={`${product.name} adedini azalt`}
                                 onClick={() =>
                                   updateQuantity(product.id, quantity - 1)
                                 }
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm transition active:scale-95"
+                                className="flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-sm transition-transform active:scale-95"
                               >
                                 <Minus className="h-4 w-4" />
                               </button>
@@ -174,6 +180,7 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
                                 name={`quantity-${product.id}`}
                                 type="number"
                                 min={0}
+                                aria-label={`${product.name} adedi`}
                                 value={quantity}
                                 onChange={(event) =>
                                   updateQuantity(
@@ -181,15 +188,16 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
                                     Number(event.target.value),
                                   )
                                 }
-                                className="mx-2 h-10 w-16 border-0 bg-transparent text-center font-bold shadow-none focus-visible:ring-0"
+                                className="mx-2 h-11 w-16 border-0 bg-transparent text-center font-bold shadow-none focus-visible:ring-0"
                               />
 
                               <button
                                 type="button"
+                                aria-label={`${product.name} adedini arttır`}
                                 onClick={() =>
                                   updateQuantity(product.id, quantity + 1)
                                 }
-                                className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm transition active:scale-95"
+                                className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm transition-transform active:scale-95"
                               >
                                 <Plus className="h-4 w-4" />
                               </button>
@@ -213,7 +221,7 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
         </div>
 
         <div className="space-y-6">
-          <Card className="sticky top-24 border-0 shadow-sm">
+          <Card className="border-0 shadow-sm xl:sticky xl:top-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 justify-between">
                 <span className="flex items-center gap-2">
@@ -238,9 +246,12 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
 
             <CardContent className="space-y-5">
               {selectedItems.length === 0 ? (
-                <div className="rounded-2xl border bg-white p-5 text-sm text-muted-foreground">
-                  Henüz ürün seçilmedi.
-                </div>
+                <EmptyState
+                  icon={ShoppingCart}
+                  title="Sepetiniz boş"
+                  description="Sipariş vermek için yukarıdan ürün seçin."
+                  className="border-solid p-5"
+                />
               ) : (
                 <div className="space-y-3">
                   {selectedItems.map((item) => (
@@ -281,13 +292,14 @@ export function CustomerOrderForm({ products }: CustomerOrderFormProps) {
                 />
               </div>
 
-              <Button
+              <SubmitButton
+                pendingText="Sipariş gönderiliyor..."
                 disabled={selectedItems.length === 0}
                 className="h-12 w-full rounded-2xl bg-orange-500 font-semibold hover:bg-orange-600"
               >
                 <Send className="mr-2 h-4 w-4" />
                 Siparişi Gönder
-              </Button>
+              </SubmitButton>
 
               {selectedItems.length > 0 ? (
                 <Badge className="w-full justify-center rounded-2xl bg-green-100 py-4 text-green-700 hover:bg-green-100">

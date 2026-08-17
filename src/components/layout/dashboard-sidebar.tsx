@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Menu, X } from "lucide-react";
 
@@ -126,6 +126,8 @@ function SidebarContent({
 
 export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const openButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -135,6 +137,23 @@ export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    closeButtonRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        openButtonRef.current?.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   return (
     <>
       <aside className="fixed left-0 top-0 z-50 hidden h-screen w-[290px] border-r border-slate-200 bg-white/90 backdrop-blur-xl lg:block">
@@ -142,8 +161,10 @@ export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
       </aside>
 
       <button
+        ref={openButtonRef}
         type="button"
         aria-label="Menüyü aç"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(true)}
         className="fixed left-4 top-4 z-[200] flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-white shadow-xl shadow-orange-500/25 transition hover:bg-orange-600 active:scale-95 lg:hidden"
       >
@@ -151,20 +172,26 @@ export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-0 z-[300] lg:hidden">
+        <div
+          className="fixed inset-0 z-[300] lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Gezinme menüsü"
+        >
           <button
             type="button"
             aria-label="Menüyü kapat"
             onClick={() => setIsOpen(false)}
-            className="absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-sm"
+            className="animate-in fade-in absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-sm duration-200"
           />
 
-          <aside className="absolute left-0 top-0 h-full w-[290px] max-w-[85vw] overflow-hidden bg-white shadow-2xl">
+          <aside className="animate-in slide-in-from-left absolute left-0 top-0 h-full w-[290px] max-w-[85vw] overflow-hidden bg-white shadow-2xl duration-300">
             <button
+              ref={closeButtonRef}
               type="button"
               aria-label="Menüyü kapat"
               onClick={() => setIsOpen(false)}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 active:scale-95"
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 active:scale-95"
             >
               <X className="h-5 w-5" />
             </button>

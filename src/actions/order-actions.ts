@@ -2,11 +2,21 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { requireCustomer } from "@/lib/auth-guards";
 
 function generateOrderNumber() {
   const random = Math.floor(1000 + Math.random() * 9000);
   return `DRS-${random}`;
+}
+
+const MAX_ORDER_NUMBER_ATTEMPTS = 5;
+
+function isOrderNumberCollision(error: unknown) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  );
 }
 
 export async function createOrderAction(formData: FormData) {
@@ -70,18 +80,28 @@ export async function createOrderAction(formData: FormData) {
   });
 
   const totalPrice = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
+  const notes = (formData.get("notes") as string) || null;
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber: generateOrderNumber(),
-      companyId,
-      totalPrice,
-      notes: (formData.get("notes") as string) || null,
-      items: {
-        create: orderItems,
-      },
-    },
-  });
+  for (let attempt = 1; attempt <= MAX_ORDER_NUMBER_ATTEMPTS; attempt++) {
+    try {
+      await prisma.order.create({
+        data: {
+          orderNumber: generateOrderNumber(),
+          companyId,
+          totalPrice,
+          notes,
+          items: {
+            create: orderItems,
+          },
+        },
+      });
+      break;
+    } catch (error) {
+      if (!isOrderNumberCollision(error) || attempt === MAX_ORDER_NUMBER_ATTEMPTS) {
+        throw error;
+      }
+    }
+  }
 
   redirect(`/customer/orders?toast=orderCreated`);
 }

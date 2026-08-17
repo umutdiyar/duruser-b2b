@@ -4,7 +4,7 @@ import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
-import { signIn, signOut } from "@/auth";
+import { CompanyInactiveError, signIn, signOut } from "@/auth";
 
 export async function loginAction(formData: FormData) {
   const email = formData.get("email") as string;
@@ -19,6 +19,10 @@ export async function loginAction(formData: FormData) {
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
+    }
+
+    if (error instanceof CompanyInactiveError) {
+      redirect("/login?toast=companyInactive");
     }
 
     if (error instanceof AuthError) {

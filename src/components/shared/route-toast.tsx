@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -34,6 +34,13 @@ const toastMessages: Record<
     type: "error",
     message: "Giriş başarısız.",
     description: "Email adresi veya şifre hatalı.",
+  },
+
+  companyInactive: {
+    type: "error",
+    message: "Firma hesabı pasif.",
+    description:
+      "Firmanızın sisteme erişimi geçici olarak durdurulmuş. Erişim için DuruSer yönetimiyle iletişime geçin.",
   },
 
   unexpectedError: {
@@ -135,6 +142,14 @@ const toastMessages: Record<
 };
 
 export function RouteToast() {
+  return (
+    <Suspense fallback={null}>
+      <RouteToastInner />
+    </Suspense>
+  );
+}
+
+function RouteToastInner() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();

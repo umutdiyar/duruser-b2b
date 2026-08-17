@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Clock3,
+  Package,
   PackageCheck,
   ShoppingCart,
   Truck,
@@ -11,13 +12,11 @@ import {
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
-import {
-  getOrderStatusClassName,
-  getOrderStatusLabel,
-} from "@/lib/order-status";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
+import { EmptyState } from "@/components/shared/empty-state";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +37,12 @@ export default async function CustomerDashboardPage() {
               in: ["PENDING", "CONFIRMED", "PREPARING", "SHIPPED"],
             },
           },
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            totalPrice: true,
+          },
           orderBy: {
             createdAt: "desc",
           },
@@ -57,6 +62,9 @@ export default async function CustomerDashboardPage() {
           where: {
             companyId,
           },
+          select: {
+            totalPrice: true,
+          },
           orderBy: {
             createdAt: "desc",
           },
@@ -69,8 +77,15 @@ export default async function CustomerDashboardPage() {
               isActive: true,
             },
           },
-          include: {
-            product: true,
+          select: {
+            customPrice: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+              },
+            },
           },
           orderBy: {
             product: {
@@ -203,15 +218,17 @@ export default async function CustomerDashboardPage() {
 
             <CardContent className="space-y-4">
               {activeOrders.length === 0 ? (
-                <div className="rounded-3xl border bg-white p-6 text-sm text-muted-foreground">
-                  Aktif siparişiniz bulunmuyor.
-                </div>
+                <EmptyState
+                  icon={Clock3}
+                  title="Aktif siparişiniz yok"
+                  description="Yeni bir sipariş oluşturduğunuzda burada görünecek."
+                />
               ) : (
                 activeOrders.map((order) => (
                   <Link
                     key={order.id}
                     href={`/customer/orders/${order.id}`}
-                    className="block rounded-3xl border bg-white p-5 transition hover:shadow-md"
+                    className="block rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-md"
                   >
                     <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
@@ -224,11 +241,7 @@ export default async function CustomerDashboardPage() {
                       </div>
 
                       <div className="flex shrink-0 flex-wrap items-center gap-3">
-                        <Badge
-                          className={getOrderStatusClassName(order.status)}
-                        >
-                          {getOrderStatusLabel(order.status)}
-                        </Badge>
+                        <OrderStatusBadge status={order.status} />
 
                         <p className="font-bold">
                           {formatCurrency(order.totalPrice)}
@@ -252,8 +265,12 @@ export default async function CustomerDashboardPage() {
 
             <CardContent className="grid gap-4 sm:grid-cols-2">
               {assignedProducts.length === 0 ? (
-                <div className="rounded-3xl border bg-white p-6 text-sm text-muted-foreground sm:col-span-2">
-                  Firmanıza tanımlı aktif ürün bulunmuyor.
+                <div className="sm:col-span-2">
+                  <EmptyState
+                    icon={Package}
+                    title="Tanımlı ürün yok"
+                    description="Firmanıza tanımlı aktif ürün bulunmuyor."
+                  />
                 </div>
               ) : (
                 assignedProducts.map(({ product, customPrice }) => {
@@ -262,7 +279,7 @@ export default async function CustomerDashboardPage() {
                   return (
                     <div
                       key={product.id}
-                      className="rounded-3xl border bg-gradient-to-br from-white to-slate-50 p-5 transition hover:-translate-y-1 hover:shadow-lg"
+                      className="rounded-3xl border bg-gradient-to-br from-white to-slate-50 p-5 transition-shadow duration-200 hover:shadow-lg"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">

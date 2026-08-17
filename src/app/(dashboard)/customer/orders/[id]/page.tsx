@@ -12,15 +12,13 @@ import {
 import { auth } from "@/auth";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { OrderStatusBadge } from "@/components/shared/order-status-badge";
+import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDateTime } from "@/lib/format";
-import {
-  getOrderStatusClassName,
-  getOrderStatusDescription,
-  getOrderStatusLabel,
-} from "@/lib/order-status";
+import { getOrderStatusDescription, getOrderStatusLabel } from "@/lib/order-status";
 import { prisma } from "@/lib/prisma";
 import { OrderStatusTimeline } from "@/components/orders/order-status-timeline";
 import { cancelOrderAction } from "@/actions/order-status-actions";
@@ -44,11 +42,25 @@ export default async function CustomerOrderDetailPage({
     where: {
       id,
     },
-    include: {
-      company: true,
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      totalPrice: true,
+      notes: true,
+      createdAt: true,
+      companyId: true,
       items: {
-        include: {
-          product: true,
+        select: {
+          id: true,
+          quantity: true,
+          unitPrice: true,
+          totalPrice: true,
+          product: {
+            select: {
+              name: true,
+            },
+          },
         },
       },
     },
@@ -133,11 +145,9 @@ export default async function CustomerOrderDetailPage({
             <CardContent className="p-6">
               <ClipboardList className="h-6 w-6 text-orange-500" />
               <p className="mt-4 text-sm text-muted-foreground">Durum</p>
-              <Badge
-                className={`mt-3 ${getOrderStatusClassName(order.status)}`}
-              >
-                {getOrderStatusLabel(order.status)}
-              </Badge>
+              <div className="mt-3">
+                <OrderStatusBadge status={order.status} />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -224,25 +234,20 @@ export default async function CustomerOrderDetailPage({
                 ) : canCustomerCancel ? (
                   <form action={cancelOrderAction} className="space-y-4">
                     <input type="hidden" name="orderId" value={order.id} />
-                    <input
-                      type="hidden"
-                      name="redirectTo"
-                      value={`/customer/orders/${order.id}`}
-                    />
 
                     <div className="rounded-2xl bg-orange-50 p-4 text-sm leading-6 text-orange-800">
                       Sipariş henüz hazırlık aşamasına geçmediği için iptal
                       edebilirsiniz.
                     </div>
 
-                    <Button
-                      type="submit"
+                    <SubmitButton
+                      pendingText="İptal ediliyor..."
                       variant="destructive"
                       className="h-12 w-full rounded-2xl font-semibold"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Siparişi İptal Et
-                    </Button>
+                    </SubmitButton>
                   </form>
                 ) : (
                   <div className="rounded-2xl border bg-white p-4 text-sm leading-6 text-muted-foreground">

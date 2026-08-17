@@ -1,9 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
 import bcrypt from "bcryptjs";
 
 import { prisma } from "@/lib/prisma";
+
+export class CompanyInactiveError extends CredentialsSignin {
+  code = "company_inactive";
+}
 
 export const {
   handlers: { GET, POST },
@@ -50,16 +54,16 @@ export const {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
+        if (!isPasswordValid) {
+          return null;
+        }
+
         if (
           user.role === "CUSTOMER" &&
           user.company &&
           !user.company.isActive
         ) {
-          return null;
-        }
-
-        if (!isPasswordValid) {
-          return null;
+          throw new CompanyInactiveError();
         }
 
         return {
