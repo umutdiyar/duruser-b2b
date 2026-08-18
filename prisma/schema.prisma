@@ -90,7 +90,8 @@ model CompanyProduct {
 model Order {
   id            String @id @default(cuid())
 
-  orderNumber   String @unique
+  orderNumber    String @unique
+  sequenceNumber Int    @unique @default(autoincrement())
 
   companyId     String
   company       Company @relation(fields: [companyId], references: [id])
@@ -105,6 +106,9 @@ model Order {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([createdAt])
 }
 
 model OrderItem {

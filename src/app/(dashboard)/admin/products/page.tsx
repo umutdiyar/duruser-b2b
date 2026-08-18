@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Package, Pencil, Plus, Search } from "lucide-react";
+import { Package, Pencil, Plus } from "lucide-react";
 
 import { toggleProductStatusAction } from "@/actions/product-actions";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
@@ -9,33 +9,61 @@ import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { RouteToast } from "@/components/shared/route-toast";
 import { ActiveBadge } from "@/components/shared/active-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterBar } from "@/components/shared/filter-bar";
+import { FilterSelect } from "@/components/shared/filter-select";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 
-export default async function ProductsPage() {
-  const products = await prisma.product.findMany({
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      price: true,
-      imageUrl: true,
-      isActive: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+type ProductSearchParams = {
+  q?: string;
+  status?: string;
+};
 
-  const activeProducts = products.filter((product) => product.isActive).length;
-  const passiveProducts = products.filter(
-    (product) => !product.isActive,
-  ).length;
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<ProductSearchParams>;
+}) {
+  const rawParams = (searchParams ? await searchParams : {}) ?? {};
+  const q = rawParams.q?.trim() ?? "";
+  const status =
+    rawParams.status === "active" || rawParams.status === "passive"
+      ? rawParams.status
+      : undefined;
+
+  const hasActiveFilters = Boolean(q || status);
+
+  const where: Prisma.ProductWhereInput = {
+    ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
+    ...(status ? { isActive: status === "active" } : {}),
+  };
+
+  const [products, totalCount, activeCount, passiveCount] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        imageUrl: true,
+        isActive: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+    prisma.product.count(),
+    prisma.product.count({ where: { isActive: true } }),
+    prisma.product.count({ where: { isActive: false } }),
+  ]);
 
   return (
     <>
@@ -84,7 +112,7 @@ export default async function ProductsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Toplam Ürün</p>
                   <p className="mt-2 text-3xl font-bold sm:text-4xl">
-                    {products.length}
+                    {totalCount}
                   </p>
                 </div>
 
@@ -101,7 +129,7 @@ export default async function ProductsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Aktif Ürün</p>
                   <p className="mt-2 text-3xl font-bold sm:text-4xl">
-                    {activeProducts}
+                    {activeCount}
                   </p>
                 </div>
 
@@ -118,7 +146,7 @@ export default async function ProductsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Pasif Ürün</p>
                   <p className="mt-2 text-3xl font-bold sm:text-4xl">
-                    {passiveProducts}
+                    {passiveCount}
                   </p>
                 </div>
 
@@ -130,34 +158,61 @@ export default async function ProductsPage() {
           </Card>
         </div>
 
-        <Card className="border-0 shadow-sm">
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <FilterBar
+          action="/admin/products"
+          hasActiveFilters={hasActiveFilters}
+          resetHref="/admin/products"
+        >
+          <div className="space-y-1.5 lg:w-[240px]">
+            <Label htmlFor="product-q">Ürün Adı</Label>
+            <Input
+              id="product-q"
+              name="q"
+              defaultValue={q}
+              placeholder="Ürün ara..."
+              className="h-11 rounded-xl"
+            />
+          </div>
 
-              <Input
-                placeholder="Ürün ara..."
-                className="h-12 rounded-2xl pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
+          <div className="space-y-1.5 lg:w-[170px]">
+            <Label htmlFor="product-status">Durum</Label>
+            <FilterSelect
+              id="product-status"
+              name="status"
+              defaultValue={status ?? ""}
+            >
+              <option value="">Tümü</option>
+              <option value="active">Aktif</option>
+              <option value="passive">Pasif</option>
+            </FilterSelect>
+          </div>
+        </FilterBar>
 
         {products.length === 0 ? (
           <EmptyState
             icon={Package}
-            title="Henüz ürün eklenmedi"
-            description="İlk ürününüzü ekleyerek kataloğu oluşturmaya başlayın."
+            title={hasActiveFilters ? "Ürün bulunamadı" : "Henüz ürün eklenmedi"}
+            description={
+              hasActiveFilters
+                ? "Bu aramaya uygun ürün bulunamadı."
+                : "İlk ürününüzü ekleyerek kataloğu oluşturmaya başlayın."
+            }
             action={
-              <Button
-                asChild
-                className="rounded-2xl bg-orange-500 hover:bg-orange-600"
-              >
-                <Link href="/admin/products/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Yeni Ürün Ekle
-                </Link>
-              </Button>
+              hasActiveFilters ? (
+                <Button asChild variant="outline" className="rounded-2xl">
+                  <Link href="/admin/products">Filtreleri Temizle</Link>
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="rounded-2xl bg-orange-500 hover:bg-orange-600"
+                >
+                  <Link href="/admin/products/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Yeni Ürün Ekle
+                  </Link>
+                </Button>
+              )
             }
           />
         ) : (

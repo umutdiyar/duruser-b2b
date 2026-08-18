@@ -24,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { RouteToast } from "@/components/shared/route-toast";
 import { formatCurrency } from "@/lib/format";
 
@@ -69,6 +71,7 @@ export default async function CompanyDetailPage({
         companyProducts: {
           select: {
             productId: true,
+            customPrice: true,
           },
         },
       },
@@ -109,6 +112,10 @@ export default async function CompanyDetailPage({
 
   const assignedProductIds = new Set(
     company.companyProducts.map((item) => item.productId),
+  );
+
+  const customPriceByProductId = new Map(
+    company.companyProducts.map((item) => [item.productId, item.customPrice]),
   );
 
   return (
@@ -215,41 +222,80 @@ export default async function CompanyDetailPage({
                 <div className="grid gap-4 md:grid-cols-2">
                   {products.map((product) => {
                     const isAssigned = assignedProductIds.has(product.id);
+                    const currentCustomPrice = customPriceByProductId.get(
+                      product.id,
+                    );
+                    const hasCustomPrice = currentCustomPrice != null;
+                    const checkboxId = `product-${product.id}`;
+                    const priceInputId = `custom-price-${product.id}`;
 
                     return (
-                      <label
+                      <div
                         key={product.id}
-                        className="flex cursor-pointer items-start gap-4 rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-lg"
+                        className="rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-lg"
                       >
-                        <Checkbox
-                          name="productIds"
-                          value={product.id}
-                          defaultChecked={isAssigned}
-                          className="mt-1"
-                        />
+                        <div className="flex items-start gap-4">
+                          <Checkbox
+                            id={checkboxId}
+                            name="productIds"
+                            value={product.id}
+                            defaultChecked={isAssigned}
+                            className="mt-1"
+                          />
 
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-semibold">{product.name}</p>
-                              <p className="mt-1 text-sm text-muted-foreground">
-                                {formatCurrency(product.price)}
-                              </p>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <label
+                                htmlFor={checkboxId}
+                                className="cursor-pointer font-semibold"
+                              >
+                                {product.name}
+                              </label>
+
+                              {product.isActive ? (
+                                <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
+                              ) : (
+                                <span className="h-5 w-5 shrink-0 rounded-full bg-red-500" />
+                              )}
                             </div>
 
-                            {product.isActive ? (
-                              <CheckCircle2 className="h-5 w-5 text-green-500" />
-                            ) : (
-                              <span className="h-5 w-5 rounded-full bg-red-500" />
-                            )}
-                          </div>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Standart fiyat: {formatCurrency(product.price)}
+                            </p>
 
-                          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-                            {product.description ||
-                              "Bu ürün için açıklama eklenmemiş."}
-                          </p>
+                            <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
+                              {product.description ||
+                                "Bu ürün için açıklama eklenmemiş."}
+                            </p>
+                          </div>
                         </div>
-                      </label>
+
+                        <div className="mt-4 space-y-2 border-t pt-4">
+                          <Label htmlFor={priceInputId} className="text-xs">
+                            Firma fiyatı
+                          </Label>
+                          <Input
+                            id={priceInputId}
+                            name={`customPrice-${product.id}`}
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            defaultValue={currentCustomPrice ?? ""}
+                            placeholder="Boş = standart fiyat"
+                            className="h-11 rounded-xl"
+                          />
+
+                          {hasCustomPrice ? (
+                            <p className="text-xs font-semibold text-orange-600">
+                              Geçerli fiyat: {formatCurrency(currentCustomPrice)}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-muted-foreground">
+                              Standart fiyat kullanılıyor
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

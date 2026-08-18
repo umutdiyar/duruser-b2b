@@ -14,40 +14,72 @@ import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { RouteToast } from "@/components/shared/route-toast";
 import { ActiveBadge } from "@/components/shared/active-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FilterBar } from "@/components/shared/filter-bar";
+import { FilterSelect } from "@/components/shared/filter-select";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toggleCompanyStatusAction } from "@/actions/company-actions";
+import type { Prisma } from "@/generated/prisma/client";
 
-export default async function CustomersPage() {
-  const companies = await prisma.company.findMany({
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      isActive: true,
-      _count: {
+type CustomerSearchParams = {
+  q?: string;
+  status?: string;
+};
+
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<CustomerSearchParams>;
+}) {
+  const rawParams = (searchParams ? await searchParams : {}) ?? {};
+  const q = rawParams.q?.trim() ?? "";
+  const status =
+    rawParams.status === "active" || rawParams.status === "passive"
+      ? rawParams.status
+      : undefined;
+
+  const hasActiveFilters = Boolean(q || status);
+
+  const where: Prisma.CompanyWhereInput = {
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { slug: { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(status ? { isActive: status === "active" } : {}),
+  };
+
+  const [companies, totalCompanyCount, totalUsers, totalOrders] =
+    await Promise.all([
+      prisma.company.findMany({
+        where,
         select: {
-          users: true,
-          orders: true,
-          companyProducts: true,
+          id: true,
+          name: true,
+          slug: true,
+          isActive: true,
+          _count: {
+            select: {
+              users: true,
+              orders: true,
+              companyProducts: true,
+            },
+          },
         },
-      },
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  const totalUsers = companies.reduce(
-    (acc, company) => acc + company._count.users,
-    0,
-  );
-
-  const totalOrders = companies.reduce(
-    (acc, company) => acc + company._count.orders,
-    0,
-  );
+        orderBy: {
+          name: "asc",
+        },
+      }),
+      prisma.company.count(),
+      prisma.user.count({ where: { role: "CUSTOMER" } }),
+      prisma.order.count(),
+    ]);
 
   return (
     <>
@@ -94,7 +126,7 @@ export default async function CustomersPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Toplam Firma</p>
                   <p className="mt-2 text-3xl font-bold sm:text-4xl">
-                    {companies.length}
+                    {totalCompanyCount}
                   </p>
                 </div>
 
@@ -144,21 +176,61 @@ export default async function CustomersPage() {
           </Card>
         </div>
 
+        <FilterBar
+          action="/admin/customers"
+          hasActiveFilters={hasActiveFilters}
+          resetHref="/admin/customers"
+        >
+          <div className="space-y-1.5 lg:w-[260px]">
+            <Label htmlFor="customer-q">Firma Adı / Kod</Label>
+            <Input
+              id="customer-q"
+              name="q"
+              defaultValue={q}
+              placeholder="Firma ara..."
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-1.5 lg:w-[170px]">
+            <Label htmlFor="customer-status">Durum</Label>
+            <FilterSelect
+              id="customer-status"
+              name="status"
+              defaultValue={status ?? ""}
+            >
+              <option value="">Tümü</option>
+              <option value="active">Aktif</option>
+              <option value="passive">Pasif</option>
+            </FilterSelect>
+          </div>
+        </FilterBar>
+
         {companies.length === 0 ? (
           <EmptyState
             icon={Building2}
-            title="Henüz firma eklenmedi"
-            description="İlk müşteri firmanızı oluşturarak başlayın."
+            title={hasActiveFilters ? "Firma bulunamadı" : "Henüz firma eklenmedi"}
+            description={
+              hasActiveFilters
+                ? "Bu aramaya uygun firma bulunamadı."
+                : "İlk müşteri firmanızı oluşturarak başlayın."
+            }
             action={
-              <Button
-                asChild
-                className="rounded-2xl bg-orange-500 hover:bg-orange-600"
-              >
-                <Link href="/admin/customers/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Yeni Firma Ekle
-                </Link>
-              </Button>
+              hasActiveFilters ? (
+                <Button asChild variant="outline" className="rounded-2xl">
+                  <Link href="/admin/customers">Filtreleri Temizle</Link>
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="rounded-2xl bg-orange-500 hover:bg-orange-600"
+                >
+                  <Link href="/admin/customers/new">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Yeni Firma Ekle
+                  </Link>
+                </Button>
+              )
             }
           />
         ) : (

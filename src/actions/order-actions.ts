@@ -1,22 +1,14 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@/generated/prisma/client";
 import { requireCustomer } from "@/lib/auth-guards";
 
-function generateOrderNumber() {
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `DRS-${random}`;
-}
-
-const MAX_ORDER_NUMBER_ATTEMPTS = 5;
-
-function isOrderNumberCollision(error: unknown) {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002"
-  );
+function formatOrderNumber(sequenceNumber: number) {
+  const year = new Date().getFullYear();
+  return `DRS-${year}-${String(sequenceNumber).padStart(6, "0")}`;
 }
 
 export async function createOrderAction(formData: FormData) {
@@ -82,26 +74,31 @@ export async function createOrderAction(formData: FormData) {
   const totalPrice = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
   const notes = (formData.get("notes") as string) || null;
 
-  for (let attempt = 1; attempt <= MAX_ORDER_NUMBER_ATTEMPTS; attempt++) {
-    try {
-      await prisma.order.create({
-        data: {
-          orderNumber: generateOrderNumber(),
-          companyId,
-          totalPrice,
-          notes,
-          items: {
-            create: orderItems,
-          },
+  // orderNumber is derived from the DB-native sequenceNumber (Postgres
+  // autoincrement), which is atomic even under concurrent inserts — no two
+  // requests can ever receive the same value, unlike a count()+1 approach.
+  // The row is created with a throwaway placeholder first because orderNumber
+  // is a required unique column and the sequence value is only known after
+  // insert; both statements commit together in one transaction, so no
+  // intermediate state is ever visible to other queries.
+  await prisma.$transaction(async (tx) => {
+    const created = await tx.order.create({
+      data: {
+        orderNumber: `TEMP-${randomUUID()}`,
+        companyId,
+        totalPrice,
+        notes,
+        items: {
+          create: orderItems,
         },
-      });
-      break;
-    } catch (error) {
-      if (!isOrderNumberCollision(error) || attempt === MAX_ORDER_NUMBER_ATTEMPTS) {
-        throw error;
-      }
-    }
-  }
+      },
+    });
+
+    await tx.order.update({
+      where: { id: created.id },
+      data: { orderNumber: formatOrderNumber(created.sequenceNumber) },
+    });
+  });
 
   redirect(`/customer/orders?toast=orderCreated`);
 }
