@@ -7,8 +7,8 @@ import { prisma } from "@/lib/prisma";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
+import { ActiveBadge } from "@/components/shared/active-badge";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
@@ -54,25 +54,18 @@ export default async function CustomerProductsPage() {
       />
 
       <DashboardContainer>
-        <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
-          <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
-            <div>
-              <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
-                Firma Ürünleri
-              </Badge>
-
-              <h2 className="mt-4 text-4xl font-bold leading-tight lg:text-5xl">
-                Size özel ürün kataloğu
-              </h2>
-
-              <p className="mt-4 max-w-xl text-slate-300">
+        <Card className="border-0 bg-slate-900 text-white shadow-sm">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="font-semibold">Size özel ürün kataloğu</p>
+              <p className="mt-1 text-sm text-slate-300">
                 Bu ekranda sadece firmanıza tanımlanmış ürünler görünür.
               </p>
             </div>
 
             <Button
               asChild
-              className="h-12 rounded-2xl bg-orange-500 px-6 hover:bg-orange-600"
+              className="h-11 shrink-0 rounded-2xl bg-orange-500 px-5 hover:bg-orange-600"
             >
               <Link href="/customer/new-order">
                 Sipariş Oluştur
@@ -96,7 +89,7 @@ export default async function CustomerProductsPage() {
               return (
                 <Card
                   key={product.id}
-                  className="group overflow-hidden border-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group overflow-hidden border-0 shadow-sm transition-shadow duration-200 hover:shadow-lg"
                 >
                   <div className="relative h-48 bg-slate-100">
                     {product.imageUrl ? (
@@ -106,7 +99,7 @@ export default async function CustomerProductsPage() {
                         fill
                         priority={index === 0}
                         sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                        className="object-cover transition duration-300 group-hover:scale-105"
+                        className="object-cover transition duration-200 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">
@@ -114,9 +107,10 @@ export default async function CustomerProductsPage() {
                       </div>
                     )}
 
-                    <Badge className="absolute right-3 top-3 border-0 bg-green-500 text-white hover:bg-green-500">
-                      Aktif
-                    </Badge>
+                    <ActiveBadge
+                      active
+                      className="absolute right-3 top-3 shadow-sm"
+                    />
                   </div>
 
                   <CardContent className="p-5">

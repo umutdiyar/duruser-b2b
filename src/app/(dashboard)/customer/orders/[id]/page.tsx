@@ -12,8 +12,8 @@ import {
 import { auth } from "@/auth";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { ConfirmSubmitButton } from "@/components/shared/confirm-submit-button";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
-import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -232,7 +232,11 @@ export default async function CustomerOrderDetailPage({
                     Bu sipariş iptal edilmiş.
                   </div>
                 ) : canCustomerCancel ? (
-                  <form action={cancelOrderAction} className="space-y-4">
+                  <form
+                    id={`cancel-order-${order.id}`}
+                    action={cancelOrderAction}
+                    className="space-y-4"
+                  >
                     <input type="hidden" name="orderId" value={order.id} />
 
                     <div className="rounded-2xl bg-orange-50 p-4 text-sm leading-6 text-orange-800">
@@ -240,14 +244,19 @@ export default async function CustomerOrderDetailPage({
                       edebilirsiniz.
                     </div>
 
-                    <SubmitButton
+                    <ConfirmSubmitButton
+                      formId={`cancel-order-${order.id}`}
+                      title="Siparişi iptal et"
+                      description={`${order.orderNumber} numaralı siparişi iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
+                      confirmLabel="Evet, İptal Et"
+                      cancelLabel="Vazgeç"
                       pendingText="İptal ediliyor..."
                       variant="destructive"
                       className="h-12 w-full rounded-2xl font-semibold"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Siparişi İptal Et
-                    </SubmitButton>
+                    </ConfirmSubmitButton>
                   </form>
                 ) : (
                   <div className="rounded-2xl border bg-white p-4 text-sm leading-6 text-muted-foreground">

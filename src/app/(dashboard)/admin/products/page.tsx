@@ -8,14 +8,15 @@ import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { RouteToast } from "@/components/shared/route-toast";
 import { ActiveBadge } from "@/components/shared/active-badge";
+import { ConfirmSubmitButton } from "@/components/shared/confirm-submit-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { FilterSelect } from "@/components/shared/filter-select";
+import { SearchField } from "@/components/shared/search-field";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -86,25 +87,6 @@ export default async function ProductsPage({
       <RouteToast />
 
       <DashboardContainer>
-        <Card className="overflow-hidden border-0 bg-gradient-to-r from-orange-500 via-orange-500 to-orange-600 text-white shadow-xl">
-          <CardContent className="p-6 lg:p-8">
-            <div className="max-w-3xl">
-              <Badge className="border-0 bg-white/15 text-white hover:bg-white/15">
-                Ürün Yönetimi
-              </Badge>
-
-              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-                Ürün Kataloğu
-              </h2>
-
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-orange-100 sm:text-base">
-                DuruSer müşterilerine sunulan ürünleri yönetin, aktif/pasif
-                durumlarını takip edin ve ürün bilgilerini güncelleyin.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5 sm:p-6">
@@ -162,15 +144,15 @@ export default async function ProductsPage({
           action="/admin/products"
           hasActiveFilters={hasActiveFilters}
           resetHref="/admin/products"
+          resultLabel={`${products.length} ürün bulundu`}
         >
           <div className="space-y-1.5 lg:w-[240px]">
             <Label htmlFor="product-q">Ürün Adı</Label>
-            <Input
+            <SearchField
               id="product-q"
               name="q"
               defaultValue={q}
               placeholder="Ürün ara..."
-              className="h-11 rounded-xl"
             />
           </div>
 
@@ -220,7 +202,7 @@ export default async function ProductsPage({
             {products.map((product, index) => (
               <Card
                 key={product.id}
-                className="group overflow-hidden border-0 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="group overflow-hidden border-0 bg-white shadow-sm transition-shadow duration-200 hover:shadow-lg"
               >
                 <div className="relative h-48 overflow-hidden bg-slate-100">
                   {product.imageUrl ? (
@@ -230,7 +212,7 @@ export default async function ProductsPage({
                       fill
                       priority={index === 0}
                       sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                      className="object-cover transition duration-300 group-hover:scale-105"
+                      className="object-cover transition duration-200 group-hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
@@ -271,7 +253,10 @@ export default async function ProductsPage({
                   </div>
 
                   <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
-                    <form action={toggleProductStatusAction}>
+                    <form
+                      id={`toggle-product-${product.id}`}
+                      action={toggleProductStatusAction}
+                    >
                       <input type="hidden" name="productId" value={product.id} />
                       <input
                         type="hidden"
@@ -279,13 +264,26 @@ export default async function ProductsPage({
                         value={String(product.isActive)}
                       />
 
-                      <SubmitButton
-                        pendingText="..."
-                        variant={product.isActive ? "outline" : "default"}
-                        className="h-11 w-full rounded-2xl"
-                      >
-                        {product.isActive ? "Pasife Al" : "Aktife Al"}
-                      </SubmitButton>
+                      {product.isActive ? (
+                        <ConfirmSubmitButton
+                          formId={`toggle-product-${product.id}`}
+                          title="Ürünü pasife al"
+                          description={`"${product.name}" ürünü pasife alınacak ve müşteriler tarafından artık sipariş edilemeyecek. Devam etmek istiyor musunuz?`}
+                          confirmLabel="Evet, Pasife Al"
+                          pendingText="..."
+                          variant="outline"
+                          className="h-11 w-full rounded-2xl"
+                        >
+                          Pasife Al
+                        </ConfirmSubmitButton>
+                      ) : (
+                        <SubmitButton
+                          pendingText="..."
+                          className="h-11 w-full rounded-2xl"
+                        >
+                          Aktife Al
+                        </SubmitButton>
+                      )}
                     </form>
 
                     <Button

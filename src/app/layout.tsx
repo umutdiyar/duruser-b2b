@@ -3,13 +3,15 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { branding } from "@/config/branding";
+
 const inter = Inter({
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "DuruSer Panel",
-  description: "B2B Sipariş Yönetim Sistemi",
+  title: branding.productName,
+  description: branding.description,
 };
 
 export default function RootLayout({

@@ -1,4 +1,4 @@
-import { Bell, LogOut, Search } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 
 import { logoutAction } from "@/actions/auth-actions";
 import { Button } from "@/components/ui/button";
@@ -37,18 +37,10 @@ export function DashboardHeader({
             type="button"
             size="icon"
             variant="outline"
-            aria-label="Ara"
-            className="hidden h-11 w-11 rounded-2xl border-slate-200 bg-white md:inline-flex"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
-
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            aria-label="Bildirimler"
-            className="h-11 w-11 rounded-2xl border-slate-200 bg-white"
+            disabled
+            aria-label="Bildirimler (yakında)"
+            title="Bildirim merkezi yakında eklenecek"
+            className="h-11 w-11 rounded-2xl border-slate-200 bg-white opacity-60"
           >
             <Bell className="h-4 w-4" />
           </Button>

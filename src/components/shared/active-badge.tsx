@@ -21,8 +21,8 @@ export function ActiveBadge({
       className={cn(
         "border-0",
         active
-          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-          : "bg-red-100 text-red-700 hover:bg-red-100",
+          ? "bg-success/10 text-success hover:bg-success/10"
+          : "bg-destructive/10 text-destructive hover:bg-destructive/10",
         className,
       )}
     >

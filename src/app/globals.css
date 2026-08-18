@@ -46,6 +46,21 @@ button:active {
   transform: scale(0.97);
 }
 
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 200ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -86,6 +101,15 @@ button:active {
   --destructive: 358 72% 49%;
   --destructive-foreground: 0 0% 100%;
 
+  --success: 152 60% 36%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+
+  --surface: 220 20% 98%;
+  --surface-foreground: 222 47% 11%;
+
   --border: 220 13% 91%;
   --input: 220 13% 91%;
   --ring: 24 95% 53%;
@@ -118,6 +142,15 @@ button:active {
   --destructive: 358 72% 49%;
   --destructive-foreground: 0 0% 100%;
 
+  --success: 152 55% 42%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 38 92% 55%;
+  --warning-foreground: 222 47% 11%;
+
+  --surface: 222 47% 14%;
+  --surface-foreground: 210 20% 98%;
+
   --border: 217 19% 20%;
   --input: 217 19% 20%;
   --ring: 24 95% 53%;
@@ -147,6 +180,15 @@ button:active {
 
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-surface: hsl(var(--surface));
+  --color-surface-foreground: hsl(var(--surface-foreground));
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));

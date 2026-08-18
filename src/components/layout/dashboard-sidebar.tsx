@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { adminNavigation, customerNavigation } from "@/constants/navigation";
+import { branding } from "@/config/branding";
 
 type DashboardSidebarProps = {
   role: "admin" | "customer";
@@ -34,16 +35,16 @@ function SidebarContent({
       <div className="shrink-0 border-b px-5 py-5 sm:px-6 sm:py-6">
         <div className="flex min-w-0 items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-base font-bold text-white shadow-lg shadow-orange-500/30 sm:h-14 sm:w-14 sm:text-lg">
-            D
+            {branding.shortName}
           </div>
 
           <div className="min-w-0">
             <h2 className="truncate text-base font-bold tracking-tight text-slate-900 sm:text-lg">
-              DuruSer
+              {branding.companyName}
             </h2>
 
             <p className="truncate text-xs text-slate-500 sm:text-sm">
-              Sipariş Paneli
+              {branding.tagline}
             </p>
           </div>
         </div>
@@ -60,7 +61,7 @@ function SidebarContent({
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-slate-900">
               {role === "admin"
-                ? "DuruSer Yönetim"
+                ? `${branding.companyName} Yönetim`
                 : (user?.companyName ?? "Firma Paneli")}
             </p>
 
@@ -113,10 +114,12 @@ function SidebarContent({
 
       <div className="shrink-0 border-t p-4 sm:p-5">
         <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-5">
-          <p className="text-sm font-semibold text-slate-900">DuruSer B2B</p>
+          <p className="text-sm font-semibold text-slate-900">
+            {branding.companyName} B2B
+          </p>
 
           <p className="mt-1 text-xs leading-relaxed text-slate-500">
-            Modern sipariş yönetim sistemi
+            {branding.description}
           </p>
         </div>
       </div>

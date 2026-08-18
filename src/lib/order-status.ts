@@ -52,10 +52,10 @@ export function getOrderStatusClassName(status: OrderStatus) {
   const classNames: Record<OrderStatus, string> = {
     PENDING: "bg-blue-100 text-blue-700 hover:bg-blue-100",
     CONFIRMED: "bg-indigo-100 text-indigo-700 hover:bg-indigo-100",
-    PREPARING: "bg-orange-100 text-orange-700 hover:bg-orange-100",
+    PREPARING: "bg-warning/15 text-amber-700 hover:bg-warning/15",
     SHIPPED: "bg-purple-100 text-purple-700 hover:bg-purple-100",
-    DELIVERED: "bg-green-100 text-green-700 hover:bg-green-100",
-    CANCELLED: "bg-red-100 text-red-700 hover:bg-red-100",
+    DELIVERED: "bg-success/10 text-success hover:bg-success/10",
+    CANCELLED: "bg-destructive/10 text-destructive hover:bg-destructive/10",
   };
 
   return classNames[status];

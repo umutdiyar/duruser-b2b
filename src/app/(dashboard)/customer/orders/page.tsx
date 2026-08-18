@@ -66,7 +66,7 @@ export default async function CustomerOrdersPage({
 
       <DashboardContainer>
         {created ? (
-          <Card className="animate-in fade-in slide-in-from-top-2 border-0 bg-green-50 shadow-sm duration-300">
+          <Card className="animate-in fade-in slide-in-from-top-2 border-0 bg-green-50 shadow-sm duration-200">
             <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-bold text-green-800">

@@ -13,13 +13,14 @@ import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { RouteToast } from "@/components/shared/route-toast";
 import { ActiveBadge } from "@/components/shared/active-badge";
+import { ConfirmSubmitButton } from "@/components/shared/confirm-submit-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { FilterSelect } from "@/components/shared/filter-select";
+import { SearchField } from "@/components/shared/search-field";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toggleCompanyStatusAction } from "@/actions/company-actions";
 import type { Prisma } from "@/generated/prisma/client";
@@ -102,23 +103,6 @@ export default async function CustomersPage({
       <RouteToast />
 
       <DashboardContainer>
-        <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
-          <CardContent className="p-6 lg:p-8">
-            <div className="max-w-3xl">
-              <p className="text-sm text-slate-400">Firma Yönetimi</p>
-
-              <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-                Müşteri Firmalar
-              </h2>
-
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-                Müşteri firmaları yönetin, kullanıcılarını takip edin ve firma
-                bazlı ürün yetkilendirmelerini düzenleyin.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-5 sm:p-6">
@@ -180,15 +164,15 @@ export default async function CustomersPage({
           action="/admin/customers"
           hasActiveFilters={hasActiveFilters}
           resetHref="/admin/customers"
+          resultLabel={`${companies.length} firma bulundu`}
         >
           <div className="space-y-1.5 lg:w-[260px]">
             <Label htmlFor="customer-q">Firma Adı / Kod</Label>
-            <Input
+            <SearchField
               id="customer-q"
               name="q"
               defaultValue={q}
               placeholder="Firma ara..."
-              className="h-11 rounded-xl"
             />
           </div>
 
@@ -238,7 +222,7 @@ export default async function CustomersPage({
             {companies.map((company) => (
               <Card
                 key={company.id}
-                className="border-0 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="border-0 bg-white shadow-sm transition-shadow duration-200 hover:shadow-lg"
               >
                 <CardContent className="flex h-full flex-col p-5">
                   <div className="flex items-start gap-4">
@@ -312,7 +296,10 @@ export default async function CustomersPage({
                       </Link>
                     </Button>
 
-                    <form action={toggleCompanyStatusAction}>
+                    <form
+                      id={`toggle-company-${company.id}`}
+                      action={toggleCompanyStatusAction}
+                    >
                       <input
                         type="hidden"
                         name="companyId"
@@ -324,13 +311,26 @@ export default async function CustomersPage({
                         value={String(company.isActive)}
                       />
 
-                      <SubmitButton
-                        pendingText="..."
-                        variant={company.isActive ? "outline" : "default"}
-                        className="h-11 w-full rounded-2xl"
-                      >
-                        {company.isActive ? "Pasife Al" : "Aktife Al"}
-                      </SubmitButton>
+                      {company.isActive ? (
+                        <ConfirmSubmitButton
+                          formId={`toggle-company-${company.id}`}
+                          title="Firmayı pasife al"
+                          description={`"${company.name}" firması pasife alınacak ve firma kullanıcıları artık giriş yapamayacak. Devam etmek istiyor musunuz?`}
+                          confirmLabel="Evet, Pasife Al"
+                          pendingText="..."
+                          variant="outline"
+                          className="h-11 w-full rounded-2xl"
+                        >
+                          Pasife Al
+                        </ConfirmSubmitButton>
+                      ) : (
+                        <SubmitButton
+                          pendingText="..."
+                          className="h-11 w-full rounded-2xl"
+                        >
+                          Aktife Al
+                        </SubmitButton>
+                      )}
                     </form>
                   </div>
                 </CardContent>

@@ -3,14 +3,15 @@ import { ArrowUpRight, PackageCheck, ShoppingCart } from "lucide-react";
 
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { DateFilter } from "@/components/shared/date-filter";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { FilterSelect } from "@/components/shared/filter-select";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { PaginationBar } from "@/components/shared/pagination-bar";
+import { SearchField } from "@/components/shared/search-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency, formatDate } from "@/lib/format";
 import {
@@ -118,15 +119,15 @@ export default async function AdminOrdersPage({
           action="/admin/orders"
           hasActiveFilters={activeFilters}
           resetHref="/admin/orders"
+          resultLabel={`${filteredCount} sipariş bulundu`}
         >
           <div className="space-y-1.5 lg:w-[220px]">
             <Label htmlFor="order-q">Sipariş No / Firma</Label>
-            <Input
+            <SearchField
               id="order-q"
               name="q"
               defaultValue={rawParams.q ?? ""}
               placeholder="DRS-2026 veya firma adı"
-              className="h-11 rounded-xl"
             />
           </div>
 
@@ -146,27 +147,19 @@ export default async function AdminOrdersPage({
             </FilterSelect>
           </div>
 
-          <div className="space-y-1.5 lg:w-[160px]">
-            <Label htmlFor="order-from">Başlangıç</Label>
-            <Input
-              id="order-from"
-              name="from"
-              type="date"
-              defaultValue={rawParams.from ?? ""}
-              className="h-11 rounded-xl"
-            />
-          </div>
+          <DateFilter
+            id="order-from"
+            name="from"
+            label="Başlangıç"
+            defaultValue={rawParams.from ?? ""}
+          />
 
-          <div className="space-y-1.5 lg:w-[160px]">
-            <Label htmlFor="order-to">Bitiş</Label>
-            <Input
-              id="order-to"
-              name="to"
-              type="date"
-              defaultValue={rawParams.to ?? ""}
-              className="h-11 rounded-xl"
-            />
-          </div>
+          <DateFilter
+            id="order-to"
+            name="to"
+            label="Bitiş"
+            defaultValue={rawParams.to ?? ""}
+          />
         </FilterBar>
 
         <Card className="border-0 shadow-sm">
@@ -174,7 +167,7 @@ export default async function AdminOrdersPage({
             <CardTitle>Gelen Siparişler</CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {orders.length === 0 ? (
               <EmptyState
                 icon={ShoppingCart}
@@ -196,64 +189,128 @@ export default async function AdminOrdersPage({
               />
             ) : (
               <>
-                {orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-md"
-                  >
-                    <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <p className="truncate font-bold">{order.orderNumber}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {order.company.name} · {formatDate(order.createdAt)}
-                        </p>
-                      </div>
-
-                      <div className="flex shrink-0 flex-wrap items-center gap-3">
-                        <OrderStatusBadge status={order.status} />
-
-                        <p className="font-bold">
-                          {formatCurrency(order.totalPrice)}
-                        </p>
-                      </div>
+                {/* Desktop: dense, scannable single-row layout */}
+                <div className="hidden overflow-x-auto lg:block">
+                  <div className="min-w-[860px]">
+                    <div className="flex items-center gap-4 px-4 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span className="w-[220px] shrink-0">Sipariş</span>
+                      <span className="w-[130px] shrink-0">Tarih</span>
+                      <span className="w-[140px] shrink-0">Durum</span>
+                      <span className="w-[90px] shrink-0">Ürün</span>
+                      <span className="w-[110px] shrink-0 text-right">Toplam</span>
+                      <span className="ml-auto w-[130px] shrink-0" />
                     </div>
 
-                    <div className="mt-4 grid gap-2 md:grid-cols-2">
-                      {order.items.map((item) => (
-                        <div
-                          key={item.id}
-                          className="flex min-w-0 items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm"
+                    <div className="space-y-2">
+                      {orders.map((order) => (
+                        <Link
+                          key={order.id}
+                          href={`/admin/orders/${order.id}`}
+                          className="flex items-center gap-4 rounded-xl border bg-white px-4 py-3 transition-colors duration-150 hover:border-orange-200 hover:bg-orange-50/40"
                         >
-                          <span className="truncate">{item.product.name}</span>
-                          <span className="shrink-0 font-semibold">
-                            {item.quantity} adet
+                          <div className="w-[220px] min-w-0 shrink-0">
+                            <p className="truncate font-semibold">
+                              {order.orderNumber}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {order.company.name}
+                            </p>
+                          </div>
+
+                          <span className="w-[130px] shrink-0 text-sm text-muted-foreground">
+                            {formatDate(order.createdAt)}
                           </span>
-                        </div>
+
+                          <span className="w-[140px] shrink-0">
+                            <OrderStatusBadge status={order.status} />
+                          </span>
+
+                          <span className="w-[90px] shrink-0 text-sm text-muted-foreground">
+                            {order.items.length} ürün
+                          </span>
+
+                          <span className="w-[110px] shrink-0 text-right font-bold">
+                            {formatCurrency(order.totalPrice)}
+                          </span>
+
+                          <span className="ml-auto flex w-[130px] shrink-0 justify-end">
+                            <span className="inline-flex items-center gap-1 text-sm font-medium text-orange-600">
+                              Detayı Gör
+                              <ArrowUpRight className="h-4 w-4" />
+                            </span>
+                          </span>
+                        </Link>
                       ))}
                     </div>
-
-                    {order.notes ? (
-                      <div className="mt-4 rounded-2xl bg-orange-50 p-4 text-sm leading-6 text-orange-800">
-                        Not: {order.notes}
-                      </div>
-                    ) : null}
-
-                    <div className="mt-5 flex justify-end">
-                      <Button asChild variant="outline" className="rounded-2xl">
-                        <Link href={`/admin/orders/${order.id}`}>
-                          Detayı Gör
-                          <ArrowUpRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Mobile / tablet: full card with item breakdown */}
+                <div className="space-y-4 lg:hidden">
+                  {orders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-md"
+                    >
+                      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="truncate font-bold">
+                            {order.orderNumber}
+                          </p>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {order.company.name} · {formatDate(order.createdAt)}
+                          </p>
+                        </div>
+
+                        <div className="flex shrink-0 flex-wrap items-center gap-3">
+                          <OrderStatusBadge status={order.status} />
+
+                          <p className="font-bold">
+                            {formatCurrency(order.totalPrice)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                        {order.items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex min-w-0 items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm"
+                          >
+                            <span className="truncate">
+                              {item.product.name}
+                            </span>
+                            <span className="shrink-0 font-semibold">
+                              {item.quantity} adet
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {order.notes ? (
+                        <div className="mt-4 rounded-2xl bg-orange-50 p-4 text-sm leading-6 text-orange-800">
+                          Not: {order.notes}
+                        </div>
+                      ) : null}
+
+                      <div className="mt-5 flex justify-end">
+                        <Button asChild variant="outline" className="rounded-2xl">
+                          <Link href={`/admin/orders/${order.id}`}>
+                            Detayı Gör
+                            <ArrowUpRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
                 <PaginationBar
                   page={filters.page}
                   totalPages={totalPages}
                   totalCount={filteredCount}
                   pageSize={ORDERS_PAGE_SIZE}
+                  itemLabel="sipariş"
                   buildHref={(page) =>
                     buildOrdersHref(rawParams, { page: String(page) })
                   }

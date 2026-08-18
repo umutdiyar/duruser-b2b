@@ -7,6 +7,7 @@ type PaginationBarProps = {
   totalPages: number;
   totalCount: number;
   pageSize: number;
+  itemLabel: string;
   buildHref: (page: number) => string;
 };
 
@@ -15,6 +16,7 @@ export function PaginationBar({
   totalPages,
   totalCount,
   pageSize,
+  itemLabel,
   buildHref,
 }: PaginationBarProps) {
   const startItem = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -25,30 +27,38 @@ export function PaginationBar({
       <p className="text-sm text-muted-foreground">
         {totalCount === 0
           ? "Sonuç yok"
-          : `${startItem}-${endItem} / ${totalCount} sonuç`}
+          : `${startItem}–${endItem} / ${totalCount} ${itemLabel}`}
       </p>
 
       <div className="flex items-center gap-2">
         {page > 1 ? (
-          <Button asChild variant="outline" className="h-11 rounded-xl">
+          <Button asChild variant="outline" className="h-11 rounded-xl px-3 sm:px-4">
             <Link href={buildHref(page - 1)}>Önceki</Link>
           </Button>
         ) : (
-          <Button variant="outline" disabled className="h-11 rounded-xl">
+          <Button
+            variant="outline"
+            disabled
+            className="h-11 rounded-xl px-3 sm:px-4"
+          >
             Önceki
           </Button>
         )}
 
-        <span className="px-2 text-sm font-medium whitespace-nowrap">
-          Sayfa {page} / {Math.max(totalPages, 1)}
+        <span className="min-w-[3.5rem] text-center text-sm font-medium whitespace-nowrap">
+          {page} / {Math.max(totalPages, 1)}
         </span>
 
         {page < totalPages ? (
-          <Button asChild variant="outline" className="h-11 rounded-xl">
+          <Button asChild variant="outline" className="h-11 rounded-xl px-3 sm:px-4">
             <Link href={buildHref(page + 1)}>Sonraki</Link>
           </Button>
         ) : (
-          <Button variant="outline" disabled className="h-11 rounded-xl">
+          <Button
+            variant="outline"
+            disabled
+            className="h-11 rounded-xl px-3 sm:px-4"
+          >
             Sonraki
           </Button>
         )}

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   ArrowLeft,
-  Building2,
   CheckCircle2,
   Package,
   Save,
@@ -18,6 +17,7 @@ import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { ActiveBadge } from "@/components/shared/active-badge";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ProductAuthorizationSearch } from "@/components/customers/product-authorization-search";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Badge } from "@/components/ui/badge";
@@ -144,19 +144,11 @@ export default async function CompanyDetailPage({
         </Button>
 
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
-          <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
-            <div>
-              <div className="flex justify-between">
-                <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
-                  Firma Detayı
-                </Badge>
-
-                <ActiveBadge
-                  active={company.isActive}
-                  activeLabel="Aktif Firma"
-                  inactiveLabel="Pasif Firma"
-                />
-              </div>
+          <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-start lg:justify-between lg:p-8">
+            <div className="min-w-0">
+              <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
+                Firma Detayı
+              </Badge>
 
               <h2 className="mt-4 text-4xl font-bold leading-tight lg:text-5xl">
                 {company.name}
@@ -168,24 +160,22 @@ export default async function CompanyDetailPage({
               </p>
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-              <p className="text-sm text-slate-400">Firma Kodu</p>
-              <p className="mt-2 text-xl font-bold">{company.slug}</p>
+            <div className="flex flex-row items-center gap-3 lg:shrink-0 lg:flex-col lg:items-end lg:gap-4">
+              <ActiveBadge
+                active={company.isActive}
+                activeLabel="Aktif Firma"
+                inactiveLabel="Pasif Firma"
+              />
+
+              <div className="rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur lg:text-right">
+                <p className="text-sm text-slate-400">Firma Kodu</p>
+                <p className="mt-1 text-lg font-bold">{company.slug}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <Building2 className="h-6 w-6 text-orange-500" />
-              <p className="mt-4 text-sm text-muted-foreground">Firma</p>
-              <p className="mt-2 text-3xl font-bold">
-                {company.isActive ? "Aktif" : "Pasif"}
-              </p>
-            </CardContent>
-          </Card>
-
+        <div className="grid gap-4 sm:grid-cols-2">
           <Card className="border-0 shadow-sm">
             <CardContent className="p-6">
               <User className="h-6 w-6 text-orange-500" />
@@ -219,7 +209,8 @@ export default async function CompanyDetailPage({
               <form action={updateCompanyProducts} className="space-y-5">
                 <input type="hidden" name="companyId" value={company.id} />
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <ProductAuthorizationSearch>
+                <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
                   {products.map((product) => {
                     const isAssigned = assignedProductIds.has(product.id);
                     const currentCustomPrice = customPriceByProductId.get(
@@ -232,9 +223,10 @@ export default async function CompanyDetailPage({
                     return (
                       <div
                         key={product.id}
-                        className="rounded-3xl border bg-white p-5 transition-shadow duration-200 hover:shadow-lg"
+                        data-product-name={product.name}
+                        className="rounded-2xl border bg-white p-4 transition-shadow duration-200 hover:shadow-md"
                       >
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-3">
                           <Checkbox
                             id={checkboxId}
                             name="productIds"
@@ -244,33 +236,28 @@ export default async function CompanyDetailPage({
                           />
 
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start justify-between gap-2">
                               <label
                                 htmlFor={checkboxId}
-                                className="cursor-pointer font-semibold"
+                                className="line-clamp-1 cursor-pointer text-sm font-semibold"
                               >
                                 {product.name}
                               </label>
 
                               {product.isActive ? (
-                                <CheckCircle2 className="h-5 w-5 shrink-0 text-green-500" />
+                                <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
                               ) : (
-                                <span className="h-5 w-5 shrink-0 rounded-full bg-red-500" />
+                                <span className="h-4 w-4 shrink-0 rounded-full bg-destructive" />
                               )}
                             </div>
 
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              Standart fiyat: {formatCurrency(product.price)}
-                            </p>
-
-                            <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-                              {product.description ||
-                                "Bu ürün için açıklama eklenmemiş."}
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              Standart: {formatCurrency(product.price)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="mt-4 space-y-2 border-t pt-4">
+                        <div className="mt-3 space-y-1.5 border-t pt-3">
                           <Label htmlFor={priceInputId} className="text-xs">
                             Firma fiyatı
                           </Label>
@@ -282,7 +269,7 @@ export default async function CompanyDetailPage({
                             step="0.01"
                             defaultValue={currentCustomPrice ?? ""}
                             placeholder="Boş = standart fiyat"
-                            className="h-11 rounded-xl"
+                            className="h-10 rounded-xl"
                           />
 
                           {hasCustomPrice ? (
@@ -299,6 +286,7 @@ export default async function CompanyDetailPage({
                     );
                   })}
                 </div>
+                </ProductAuthorizationSearch>
 
                 <SubmitButton
                   pendingText="Kaydediliyor..."

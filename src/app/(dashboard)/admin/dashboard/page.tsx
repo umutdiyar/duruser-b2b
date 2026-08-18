@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import {
+  AlertCircle,
   ArrowUpRight,
   ShoppingCart,
   PackageCheck,
@@ -18,7 +19,7 @@ import { OrdersChart } from "@/components/dashboard/orders-chart";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatDate } from "@/lib/format";
 
 const WEEKDAY_LABELS = ["Pzt", "Sal", "Çrş", "Prş", "Cum", "Cts", "Paz"];
 
@@ -39,6 +40,7 @@ export default async function AdminDashboardPage() {
 
   const [
     recentOrders,
+    attentionOrders,
     companies,
     products,
     totalOrders,
@@ -61,6 +63,25 @@ export default async function AdminDashboardPage() {
       },
       orderBy: {
         createdAt: "desc",
+      },
+      take: 5,
+    }),
+    // Oldest pending orders first — these have been waiting longest for
+    // admin action, so they surface at the top of the "needs attention" list.
+    prisma.order.findMany({
+      where: { status: "PENDING" },
+      select: {
+        id: true,
+        orderNumber: true,
+        createdAt: true,
+        company: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
       },
       take: 5,
     }),
@@ -225,25 +246,46 @@ export default async function AdminDashboardPage() {
           </Card>
 
           <Card className="border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle>Son Aktiviteler</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-warning" />
+                Dikkat Gerektiren Siparişler
+              </CardTitle>
+
+              {pendingOrders > 0 ? (
+                <Badge className="border-0 bg-warning/15 text-amber-700 hover:bg-warning/15">
+                  {pendingOrders} bekliyor
+                </Badge>
+              ) : null}
             </CardHeader>
 
-            <CardContent className="space-y-4">
-              {[
-                `${pendingOrders} yeni sipariş işlem bekliyor.`,
-                `${shippedOrders} sipariş sevkiyat sürecinde.`,
-                `${deliveredOrders} sipariş teslim edildi.`,
-                `${products} ürün katalogda yer alıyor.`,
-              ].map((activity) => (
-                <div
-                  key={activity}
-                  className="flex gap-3 rounded-2xl bg-slate-50 p-4"
-                >
-                  <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
-                  <p className="text-sm leading-6 text-slate-600">{activity}</p>
-                </div>
-              ))}
+            <CardContent className="space-y-3">
+              {attentionOrders.length === 0 ? (
+                <EmptyState
+                  icon={PackageCheck}
+                  title="Bekleyen sipariş yok"
+                  description="Tüm siparişler işleme alınmış durumda."
+                />
+              ) : (
+                attentionOrders.map((order) => (
+                  <Link
+                    key={order.id}
+                    href={`/admin/orders/${order.id}`}
+                    className="flex items-center justify-between gap-3 rounded-2xl bg-warning/10 p-4 transition-colors duration-150 hover:bg-warning/15"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {order.company.name}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {order.orderNumber} · {formatDate(order.createdAt)}
+                      </p>
+                    </div>
+
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  </Link>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>

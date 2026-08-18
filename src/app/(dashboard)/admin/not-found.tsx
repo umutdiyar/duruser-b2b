@@ -10,12 +10,20 @@ export default function AdminNotFound() {
     <DashboardContainer>
       <EmptyState
         icon={SearchX}
-        title="Aradığınız sayfa bulunamadı"
-        description="Bu kayıt silinmiş veya hiç var olmamış olabilir."
+        title="Kayıt bulunamadı"
+        description="Aradığınız kayıt silinmiş, taşınmış veya erişilebilir olmayabilir."
         action={
-          <Button asChild className="rounded-2xl bg-orange-500 hover:bg-orange-600">
-            <Link href="/admin/dashboard">Panele Dön</Link>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild variant="outline" className="rounded-2xl">
+              <Link href="/admin/orders">Listeye Dön</Link>
+            </Button>
+            <Button
+              asChild
+              className="rounded-2xl bg-orange-500 hover:bg-orange-600"
+            >
+              <Link href="/admin/dashboard">Dashboard</Link>
+            </Button>
+          </div>
         }
       />
     </DashboardContainer>

@@ -16,15 +16,15 @@ export default async function UnauthorizedPage() {
         : "/login";
 
   return (
-    <main className="flex  min-h-screen items-center justify-center bg-[#f5f7fb] p-4">
-      <Card className="w-full  max-w-md border-0 bg-white shadow-2xl shadow-slate-200/70">
+    <main className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md border-0 bg-white shadow-2xl shadow-slate-200/70">
         <CardContent className="flex flex-col items-center p-6 text-center sm:p-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
             <ShieldAlert className="h-8 w-8" />
           </div>
 
           <h1 className="mt-6 text-2xl font-bold tracking-tight text-slate-900">
-            Bu işlem için yetkiniz yok
+            Bu sayfaya erişim yetkiniz yok.
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-muted-foreground">

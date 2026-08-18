@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RouteToast } from "@/components/shared/route-toast";
 import { SubmitButton } from "@/components/shared/submit-button";
+import { branding } from "@/config/branding";
 
 export default function LoginPage() {
   return (
@@ -33,14 +34,12 @@ export default function LoginPage() {
           <div className="relative">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500 text-lg font-bold shadow-xl shadow-orange-500/30">
-                D
+                {branding.shortName}
               </div>
 
               <div>
-                <h1 className="text-xl font-bold">DuruSer B2B</h1>
-                <p className="text-sm text-slate-400">
-                  Sipariş Yönetim Sistemi
-                </p>
+                <h1 className="text-xl font-bold">{branding.companyName} B2B</h1>
+                <p className="text-sm text-slate-400">{branding.description}</p>
               </div>
             </div>
 
@@ -108,13 +107,13 @@ export default function LoginPage() {
               <div className="mb-8 lg:hidden">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 font-bold text-white">
-                    D
+                    {branding.shortName}
                   </div>
 
                   <div>
-                    <h1 className="font-bold">DuruSer B2B</h1>
+                    <h1 className="font-bold">{branding.companyName} B2B</h1>
                     <p className="text-sm text-muted-foreground">
-                      Sipariş Paneli
+                      {branding.tagline}
                     </p>
                   </div>
                 </div>
