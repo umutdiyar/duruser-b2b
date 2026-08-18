@@ -1,81 +1,117 @@
-import { Mail, Shield, User as UserIcon } from "lucide-react";
-
 import { auth } from "@/auth";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { SettingsRow } from "@/components/shared/settings-row";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { branding } from "@/config/branding";
 
 export default async function AdminSettingsPage() {
   const session = await auth();
-
-  const fields = [
-    {
-      icon: UserIcon,
-      label: "Ad Soyad",
-      value: session?.user?.name ?? "—",
-    },
-    {
-      icon: Mail,
-      label: "Email",
-      value: session?.user?.email ?? "—",
-    },
-    {
-      icon: Shield,
-      label: "Rol",
-      value: "DuruSer Yönetimi (ADMIN)",
-    },
-  ];
 
   return (
     <>
       <DashboardHeader
         title="Ayarlar"
-        description="Hesap bilgilerinizi görüntüleyin."
+        description="Hesap ve platform bilgilerinizi görüntüleyin."
       />
 
-      <DashboardContainer>
-        <Card className="border-0 shadow-sm">
+      <DashboardContainer className="max-w-3xl">
+        <Card className="border-0 shadow-none">
           <CardHeader>
-            <CardTitle>Hesap Bilgilerim</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-3">
-            {fields.map((field) => {
-              const Icon = field.icon;
-
-              return (
-                <div
-                  key={field.label}
-                  className="flex items-center gap-4 rounded-2xl border bg-white p-4"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
-                    <Icon className="h-5 w-5" />
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">
-                      {field.label}
-                    </p>
-                    <p className="truncate font-semibold text-slate-900">
-                      {field.value}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm">
-          <CardHeader>
-            <CardTitle>Sistem Ayarları</CardTitle>
+            <CardTitle role="heading" aria-level={2}>
+              Hesap
+            </CardTitle>
           </CardHeader>
 
           <CardContent>
-            <p className="rounded-2xl border border-dashed bg-slate-50 p-5 text-sm leading-6 text-muted-foreground">
-              Bildirim tercihleri, marka ayarları ve ekip yönetimi gibi
-              sistem ayarları önümüzdeki sürümlerde bu ekrana eklenecek.
+            <SettingsRow label="Ad Soyad" value={session?.user?.name ?? "—"} />
+            <SettingsRow label="Email" value={session?.user?.email ?? "—"} />
+            <SettingsRow
+              label="Rol"
+              value={`${branding.companyName} Yönetimi (ADMIN)`}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-none">
+          <CardHeader>
+            <CardTitle role="heading" aria-level={2}>
+              Platform
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <SettingsRow label="Platform Adı" value={branding.productName} />
+            <SettingsRow label="Şirket" value={branding.companyFullName} />
+            <SettingsRow label="Açıklama" value={branding.description} />
+            <SettingsRow label="Website" value={branding.website} />
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-none">
+          <CardHeader>
+            <CardTitle role="heading" aria-level={2}>
+              Marka / Görünüm
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <SettingsRow label="Marka Adı" value={branding.companyName} />
+
+            <div className="flex items-center justify-between border-b border-slate-100 py-3 last:border-b-0">
+              <p className="text-sm text-muted-foreground">Renkler</p>
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-6 w-6 rounded-full border border-slate-200 bg-primary"
+                  title="Primary"
+                />
+                <span
+                  className="h-6 w-6 rounded-full border border-slate-200 bg-destructive"
+                  title="Destructive"
+                />
+              </div>
+            </div>
+
+            <p className="text-xs leading-5 text-muted-foreground">
+              Marka özelleştirme seçenekleri daha sonra yönetilebilir hale
+              getirilebilir.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-none">
+          <CardHeader>
+            <CardTitle role="heading" aria-level={2}>
+              Bildirimler
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Bildirim tercihleri, bildirim altyapısı etkinleştirildiğinde bu
+              bölümden yönetilebilecek.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-none">
+          <CardHeader>
+            <CardTitle role="heading" aria-level={2}>
+              Güvenlik
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <SettingsRow
+              label="Rol Bazlı Erişim"
+              value="Aktif"
+              valueClassName="text-success"
+            />
+            <SettingsRow
+              label="Sunucu Taraflı Yetkilendirme"
+              value="Aktif"
+              valueClassName="text-success"
+            />
           </CardContent>
         </Card>
       </DashboardContainer>

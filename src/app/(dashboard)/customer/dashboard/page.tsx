@@ -12,14 +12,22 @@ import {
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
+import { getOrderStatusLabel } from "@/lib/order-status";
+import type { OrderStatus } from "@/generated/prisma/client";
 
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
+const ACTIVE_STATUS_ORDER: OrderStatus[] = [
+  "PENDING",
+  "CONFIRMED",
+  "PREPARING",
+  "SHIPPED",
+];
 
 export default async function CustomerDashboardPage() {
   const session = await auth();
@@ -28,8 +36,20 @@ export default async function CustomerDashboardPage() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [activeOrders, monthlyOrders, lastOrder, assignedProducts] = companyId
+  const [
+    company,
+    activeOrders,
+    monthlyOrders,
+    lastOrder,
+    assignedProducts,
+    statusCounts,
+  ] = companyId
     ? await Promise.all([
+        prisma.company.findUnique({
+          where: { id: companyId },
+          select: { name: true },
+        }),
+
         prisma.order.findMany({
           where: {
             companyId,
@@ -94,8 +114,21 @@ export default async function CustomerDashboardPage() {
           },
           take: 4,
         }),
+
+        prisma.order.groupBy({
+          by: ["status"],
+          where: {
+            companyId,
+            status: { in: ACTIVE_STATUS_ORDER },
+          },
+          _count: { _all: true },
+        }),
       ])
-    : [[], 0, null, []];
+    : [null, [], 0, null, [], []];
+
+  const statusCountByStatus = new Map(
+    statusCounts.map((entry) => [entry.status, entry._count._all]),
+  );
 
   return (
     <>
@@ -116,46 +149,35 @@ export default async function CustomerDashboardPage() {
       />
 
       <DashboardContainer>
-        <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl">
-          <CardContent className="flex flex-col gap-8 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
-            <div>
-              <Badge className="border-0 bg-white/10 text-white hover:bg-white/10">
-                Hızlı Sipariş
-              </Badge>
-
-              <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-                Siparişlerinizi
-                <br />
-                saniyeler içinde oluşturun
-              </h2>
-
-              <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                Firmanıza tanımlı ürünleri görüntüleyin, sipariş oluşturun ve
-                sipariş sürecini canlı takip edin.
+        <div className="flex flex-col gap-4 rounded-3xl border bg-white p-6 sm:flex-row sm:items-center sm:justify-between lg:p-8">
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">Hoş geldiniz</p>
+            <h2 className="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              {session?.user?.name ?? "Kullanıcı"}
+            </h2>
+            {company ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Firma: {company.name}
               </p>
-            </div>
+            ) : null}
+          </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button
-                asChild
-                className="h-12 rounded-2xl bg-orange-500 px-6 text-white hover:bg-orange-600"
-              >
-                <Link href="/customer/new-order">
-                  Yeni Sipariş
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              asChild
+              className="h-12 rounded-2xl bg-orange-500 px-6 font-semibold hover:bg-orange-600"
+            >
+              <Link href="/customer/new-order">
+                Yeni Sipariş
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
 
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:bg-white/20"
-              >
-                <Link href="/customer/orders">Siparişlerim</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            <Button asChild variant="outline" className="h-12 rounded-2xl">
+              <Link href="/customer/orders">Siparişlerim</Link>
+            </Button>
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-0 shadow-sm">
@@ -317,6 +339,30 @@ export default async function CustomerDashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle>Sipariş Durumu</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {ACTIVE_STATUS_ORDER.map((status) => (
+                <div
+                  key={status}
+                  className="rounded-2xl border bg-white p-4"
+                >
+                  <p className="text-sm text-muted-foreground">
+                    {getOrderStatusLabel(status)}
+                  </p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {statusCountByStatus.get(status) ?? 0}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </DashboardContainer>
     </>
   );

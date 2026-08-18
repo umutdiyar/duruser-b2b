@@ -4,130 +4,272 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
-import { Menu, X } from "lucide-react";
+import { LogOut, Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { adminNavigation, customerNavigation } from "@/constants/navigation";
+import { adminNavigation, customerNavigation, type NavItem } from "@/constants/navigation";
 import { branding } from "@/config/branding";
+import { logoutAction } from "@/actions/auth-actions";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+type SidebarUser = {
+  name?: string | null;
+  email?: string | null;
+  companyName?: string | null;
+};
 
 type DashboardSidebarProps = {
   role: "admin" | "customer";
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    companyName?: string | null;
-  };
+  user?: SidebarUser;
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
 };
 
-function SidebarContent({
-  role,
-  user,
+function NavLink({
+  href,
+  title,
+  Icon,
+  collapsed,
   onNavigate,
-}: DashboardSidebarProps & {
+}: {
+  href: string;
+  title: string;
+  Icon: NavItem["icon"];
+  collapsed: boolean;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
-  const links = role === "admin" ? adminNavigation : customerNavigation;
+  const link = (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      aria-current={isActive ? "page" : undefined}
+      aria-label={collapsed ? title : undefined}
+      className={cn(
+        "group relative flex h-11 min-w-0 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors duration-150",
+        collapsed && "justify-center px-0",
+        isActive
+          ? "bg-orange-50 text-orange-600"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+      )}
+    >
+      {isActive ? (
+        <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-orange-500" />
+      ) : null}
+
+      <Icon
+        className={cn(
+          "h-[18px] w-[18px] shrink-0 transition-colors",
+          isActive ? "text-orange-600" : "text-slate-400 group-hover:text-slate-600",
+        )}
+      />
+
+      <span
+        className={cn(
+          "truncate transition-[opacity,width] duration-150",
+          collapsed && "w-0 overflow-hidden opacity-0",
+        )}
+      >
+        {title}
+      </span>
+    </Link>
+  );
+
+  if (!collapsed) return link;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-white">
-      <div className="shrink-0 border-b px-5 py-5 sm:px-6 sm:py-6">
-        <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-base font-bold text-white shadow-lg shadow-orange-500/30 sm:h-14 sm:w-14 sm:text-lg">
-            {branding.shortName}
-          </div>
+    <Tooltip>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right">{title}</TooltipContent>
+    </Tooltip>
+  );
+}
 
-          <div className="min-w-0">
-            <h2 className="truncate text-base font-bold tracking-tight text-slate-900 sm:text-lg">
-              {branding.companyName}
-            </h2>
+function SidebarBrand({
+  collapsed,
+  onToggleCollapsed,
+}: {
+  collapsed: boolean;
+  onToggleCollapsed?: () => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex shrink-0 items-center gap-3 border-b px-4 py-4",
+        collapsed && "flex-col gap-2 px-2 py-3",
+      )}
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-sm font-bold text-white shadow-sm shadow-orange-500/30">
+        {branding.shortName}
+      </div>
 
-            <p className="truncate text-xs text-slate-500 sm:text-sm">
-              {branding.tagline}
-            </p>
-          </div>
+      {collapsed ? null : (
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-sm font-bold tracking-tight text-slate-900">
+            {branding.companyName}
+          </h2>
+          <p className="truncate text-xs text-slate-500">{branding.tagline}</p>
         </div>
-      </div>
+      )}
 
-      <div className="mt-5 rounded-3xl mx-4 border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-sm font-bold text-white shadow-lg shadow-orange-500/25">
-            {role === "admin"
-              ? "D"
-              : (user?.companyName?.charAt(0)?.toUpperCase() ?? "F")}
-          </div>
-
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-900">
-              {role === "admin"
-                ? `${branding.companyName} Yönetim`
-                : (user?.companyName ?? "Firma Paneli")}
-            </p>
-
-            <p className="mt-1 truncate text-xs text-slate-500">
-              {user?.name ?? "Kullanıcı"}
-            </p>
-
-            <p className="mt-1 truncate text-[11px] text-slate-400">
-              {user?.email ?? "email bilgisi yok"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
-        <nav className="space-y-2">
-          {links.map((link) => {
-            const Icon = link.icon;
-
-            const isActive =
-              pathname === link.href || pathname.startsWith(`${link.href}/`);
-
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={onNavigate}
-                className={cn(
-                  "group flex h-12 min-w-0 items-center gap-3 rounded-2xl px-4 text-sm font-medium transition-all duration-200 sm:h-14 sm:gap-4 sm:px-5",
-                  isActive
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25"
-                    : "text-slate-600 hover:bg-orange-50 hover:text-orange-600",
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "h-5 w-5 shrink-0 transition",
-                    isActive
-                      ? "text-white"
-                      : "text-slate-400 group-hover:text-orange-500",
-                  )}
-                />
-
-                <span className="truncate">{link.title}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className="shrink-0 border-t p-4 sm:p-5">
-        <div className="rounded-3xl bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-5">
-          <p className="text-sm font-semibold text-slate-900">
-            {branding.companyName} B2B
-          </p>
-
-          <p className="mt-1 text-xs leading-relaxed text-slate-500">
-            {branding.description}
-          </p>
-        </div>
-      </div>
+      {onToggleCollapsed ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={onToggleCollapsed}
+              aria-label={collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40"
+            >
+              {collapsed ? (
+                <PanelLeftOpen className="h-[18px] w-[18px]" />
+              ) : (
+                <PanelLeftClose className="h-[18px] w-[18px]" />
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {collapsed ? "Menüyü genişlet" : "Menüyü daralt"}
+          </TooltipContent>
+        </Tooltip>
+      ) : null}
     </div>
   );
 }
 
-export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
+function SidebarFooter({
+  role,
+  user,
+  collapsed,
+}: {
+  role: "admin" | "customer";
+  user?: SidebarUser;
+  collapsed: boolean;
+}) {
+  const displayName =
+    role === "admin" ? `${branding.companyName} Yönetim` : (user?.companyName ?? "Firma Paneli");
+  const secondaryLine = user?.name ?? "Kullanıcı";
+  const initial =
+    role === "admin"
+      ? branding.shortName
+      : (user?.companyName?.charAt(0)?.toUpperCase() ?? "F");
+
+  const avatar = (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-sm font-bold text-white shadow-sm shadow-orange-500/25">
+      {initial}
+    </div>
+  );
+
+  const logoutButton = (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label="Çıkış Yap"
+          onClick={() => logoutAction()}
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40",
+          )}
+        >
+          <LogOut className="h-[18px] w-[18px]" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side={collapsed ? "right" : "top"}>Çıkış Yap</TooltipContent>
+    </Tooltip>
+  );
+
+  if (collapsed) {
+    return (
+      <div className="mt-auto flex shrink-0 flex-col items-center gap-2 border-t p-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              tabIndex={0}
+              aria-label={`${displayName}, ${secondaryLine}${user?.email ? `, ${user.email}` : ""}`}
+              className="flex h-10 w-10 cursor-default items-center justify-center rounded-xl bg-orange-500 text-sm font-bold text-white shadow-sm shadow-orange-500/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40"
+            >
+              {initial}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="text-left">
+            <p className="font-semibold">{displayName}</p>
+            <p className="text-slate-300">{secondaryLine}</p>
+            {user?.email ? <p className="text-slate-300">{user.email}</p> : null}
+          </TooltipContent>
+        </Tooltip>
+
+        {logoutButton}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-auto flex shrink-0 items-center gap-3 border-t p-3">
+      {avatar}
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p>
+        <p className="truncate text-xs text-slate-500">{secondaryLine}</p>
+        {user?.email ? (
+          <p className="truncate text-xs text-slate-400">{user.email}</p>
+        ) : null}
+      </div>
+
+      {logoutButton}
+    </div>
+  );
+}
+
+function SidebarContent({
+  role,
+  user,
+  collapsed,
+  onNavigate,
+  onToggleCollapsed,
+}: {
+  role: "admin" | "customer";
+  user?: SidebarUser;
+  collapsed: boolean;
+  onNavigate?: () => void;
+  onToggleCollapsed?: () => void;
+}) {
+  const items = role === "admin" ? adminNavigation : customerNavigation;
+
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      <SidebarBrand collapsed={collapsed} onToggleCollapsed={onToggleCollapsed} />
+
+      <nav
+        aria-label="Ana navigasyon"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3"
+      >
+        <div className="space-y-1">
+          {items.map((item) => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+              title={item.title}
+              Icon={item.icon}
+              collapsed={collapsed}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      </nav>
+
+      <SidebarFooter role={role} user={user} collapsed={collapsed} />
+    </div>
+  );
+}
+
+export function DashboardSidebar({
+  role,
+  user,
+  collapsed,
+  onToggleCollapsed,
+}: DashboardSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -159,8 +301,18 @@ export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 z-50 hidden h-screen w-[290px] border-r border-slate-200 bg-white/90 backdrop-blur-xl lg:block">
-        <SidebarContent role={role} user={user} />
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-50 hidden h-screen border-r border-slate-200 bg-white/90 backdrop-blur-xl transition-[width] duration-200 ease-out lg:flex lg:flex-col",
+          collapsed ? "lg:w-[76px]" : "lg:w-[248px]",
+        )}
+      >
+        <SidebarContent
+          role={role}
+          user={user}
+          collapsed={collapsed}
+          onToggleCollapsed={onToggleCollapsed}
+        />
       </aside>
 
       <button
@@ -188,7 +340,7 @@ export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
             className="animate-in fade-in absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-sm duration-200"
           />
 
-          <aside className="animate-in slide-in-from-left absolute left-0 top-0 h-full w-[290px] max-w-[85vw] overflow-hidden bg-white shadow-2xl duration-300">
+          <aside className="animate-in slide-in-from-left absolute left-0 top-0 h-full w-[min(300px,calc(100vw-24px))] overflow-hidden bg-white shadow-2xl duration-300">
             <button
               ref={closeButtonRef}
               type="button"
@@ -202,6 +354,7 @@ export function DashboardSidebar({ role, user }: DashboardSidebarProps) {
             <SidebarContent
               role={role}
               user={user}
+              collapsed={false}
               onNavigate={() => setIsOpen(false)}
             />
           </aside>

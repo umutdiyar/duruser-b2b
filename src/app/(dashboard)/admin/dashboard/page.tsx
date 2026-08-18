@@ -3,7 +3,9 @@ import Link from "next/link";
 import {
   AlertCircle,
   ArrowUpRight,
+  Building2,
   ShoppingCart,
+  Package,
   PackageCheck,
   Clock3,
   Truck,
@@ -20,6 +22,28 @@ import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { branding } from "@/config/branding";
+
+const quickActions = [
+  {
+    label: "Yeni Firma",
+    description: "Müşteri firma ekle",
+    href: "/admin/customers/new",
+    icon: Building2,
+  },
+  {
+    label: "Yeni Ürün",
+    description: "Kataloğa ürün ekle",
+    href: "/admin/products/new",
+    icon: Package,
+  },
+  {
+    label: "Siparişleri Gör",
+    description: "Tüm siparişleri listele",
+    href: "/admin/orders",
+    icon: ShoppingCart,
+  },
+] as const;
 
 const WEEKDAY_LABELS = ["Pzt", "Sal", "Çrş", "Prş", "Cum", "Cts", "Paz"];
 
@@ -166,7 +190,7 @@ export default async function AdminDashboardPage() {
           <CardContent className="flex flex-col gap-8 p-6 lg:p-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <Badge className="border-0 bg-white/15 text-white hover:bg-white/15">
-                DuruSer B2B
+                {branding.companyName} B2B
               </Badge>
 
               <h2 className="mt-4 text-3xl lg:text-5xl leading-tight font-bold tracking-tight sm:text-4xl">
@@ -226,6 +250,35 @@ export default async function AdminDashboardPage() {
                   </p>
                 </CardContent>
               </Card>
+            );
+          })}
+        </div>
+
+        {/* QUICK ACTIONS */}
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
+
+            return (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="flex items-center gap-3 rounded-2xl border bg-white p-4 transition-colors duration-150 hover:border-orange-200 hover:bg-orange-50/40"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                  <Icon className="h-5 w-5" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-900">
+                    {action.label}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {action.description}
+                  </p>
+                </div>
+              </Link>
             );
           })}
         </div>

@@ -16,6 +16,7 @@ import { updateCompanyProducts } from "@/actions/company-product-actions";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { ActiveBadge } from "@/components/shared/active-badge";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ProductAuthorizationSearch } from "@/components/customers/product-authorization-search";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
@@ -136,12 +137,21 @@ export default async function CompanyDetailPage({
       <RouteToast />
 
       <DashboardContainer>
-        <Button asChild variant="outline" className="rounded-2xl">
-          <Link href="/admin/customers">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Firmalara Dön
-          </Link>
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Breadcrumb
+            items={[
+              { label: "Müşteriler", href: "/admin/customers" },
+              { label: company.name },
+            ]}
+          />
+
+          <Button asChild variant="outline" className="rounded-2xl">
+            <Link href="/admin/customers">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Firmalara Dön
+            </Link>
+          </Button>
+        </div>
 
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
           <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-start lg:justify-between lg:p-8">

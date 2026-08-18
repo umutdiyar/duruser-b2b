@@ -16,6 +16,7 @@ import {
 } from "@/actions/order-status-actions";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { ConfirmSubmitButton } from "@/components/shared/confirm-submit-button";
 import { OrderStatusBadge } from "@/components/shared/order-status-badge";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -98,6 +99,13 @@ export default async function AdminOrderDetailPage({
       <RouteToast />
 
       <DashboardContainer>
+        <Breadcrumb
+          items={[
+            { label: "Siparişler", href: "/admin/orders" },
+            { label: order.orderNumber },
+          ]}
+        />
+
         <Card className="overflow-hidden border-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl">
           <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
             <div className="min-w-0">

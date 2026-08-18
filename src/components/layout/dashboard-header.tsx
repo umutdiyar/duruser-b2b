@@ -1,8 +1,4 @@
-import { Bell, LogOut } from "lucide-react";
-
-import { logoutAction } from "@/actions/auth-actions";
-import { Button } from "@/components/ui/button";
-import { SubmitButton } from "@/components/shared/submit-button";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 type DashboardHeaderProps = {
   title: string;
@@ -17,14 +13,14 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
-      <div className="flex min-h-[72px] items-center justify-between gap-3 py-3 pl-20 pr-4 sm:px-6 lg:min-h-20 lg:px-10 ">
+      <div className="flex min-h-16 items-center justify-between gap-3 py-2.5 pl-20 pr-4 sm:px-6 lg:min-h-[72px] lg:pl-10 lg:pr-6">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+          <h1 className="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl">
             {title}
           </h1>
 
           {description ? (
-            <p className="mt-1 hidden truncate text-sm text-slate-500 md:block">
+            <p className="mt-0.5 hidden truncate text-sm text-slate-500 md:block">
               {description}
             </p>
           ) : null}
@@ -33,29 +29,7 @@ export function DashboardHeader({
         <div className="flex shrink-0 items-center gap-2 lg:gap-3">
           {actions ? <div className="hidden md:flex">{actions}</div> : null}
 
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            disabled
-            aria-label="Bildirimler (yakında)"
-            title="Bildirim merkezi yakında eklenecek"
-            className="h-11 w-11 rounded-2xl border-slate-200 bg-white opacity-60"
-          >
-            <Bell className="h-4 w-4" />
-          </Button>
-
-          <form action={logoutAction}>
-            <SubmitButton
-              pendingText="Çıkış yapılıyor..."
-              variant="outline"
-              aria-label="Çıkış yap"
-              className="h-11 rounded-2xl border-slate-200 bg-white px-3 lg:px-4"
-            >
-              <LogOut className="h-4 w-4 lg:mr-2" />
-              <span className="hidden lg:inline">Çıkış Yap</span>
-            </SubmitButton>
-          </form>
+          <NotificationBell />
         </div>
       </div>
 
